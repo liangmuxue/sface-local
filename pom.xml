@@ -236,6 +236,16 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.25.Final</version>
         </dependency>
+        <dependency>
+            <groupId>com.jna</groupId>
+            <artifactId>jnaJar</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.examples</groupId>
+            <artifactId>examplesJar</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>
