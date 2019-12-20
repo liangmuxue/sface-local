@@ -24,6 +24,7 @@ public class PropertiesUtil {
     private String captureUrl;
     private String serverIp;
     private String socketPort;
+    private String webSocketUrl;
 
     public String getIp() {
         return ip;
@@ -95,5 +96,13 @@ public class PropertiesUtil {
 
     public void setSocketPort(String socketPort) {
         this.socketPort = socketPort;
+    }
+
+    public String getWebSocketUrl() {
+        return webSocketUrl;
+    }
+
+    public void setWebSocketUrl(String webSocketUrl) {
+        this.webSocketUrl = webSocketUrl;
     }
 }

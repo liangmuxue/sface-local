@@ -21,8 +21,8 @@ public class MySocket implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        NioClient nc = new NioClient(this.propertiesUtil.getServerIp(), Integer.parseInt(this.propertiesUtil.getSocketPort()));
-        new Thread(nc).start();
-        ClientCache.clientMap.put("id", nc);
+//        NioClient nc = new NioClient(this.propertiesUtil.getServerIp(), Integer.parseInt(this.propertiesUtil.getSocketPort()));
+//        new Thread(nc).start();
+//        ClientCache.clientMap.put("id", nc);
     }
 }
