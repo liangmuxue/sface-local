@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -164,6 +165,19 @@ public class Alarm {
                         String newName = sf.format(new Date());
                         try {
                             String url = propertiesUtil.getCaptureUrl() + "/" + capture.getDeviceId() + "_" + newName + ".jpg";
+                            File dir = new File(url);
+                            if (!dir.exists()) {
+                                try {
+                                    boolean newFile = dir.createNewFile();
+                                    if (newFile){
+                                        logger.info("创建成功");
+                                    } else {
+                                        logger.info("创建失败");
+                                    }
+                                } catch (Exception e) {
+                                    logger.info("创建文件失败：" + e, e.toString());
+                                }
+                            }
                             fout = new FileOutputStream(url);
                             //将字节写入文件
                             long offset = 0;

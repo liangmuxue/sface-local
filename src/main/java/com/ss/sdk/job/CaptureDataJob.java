@@ -50,15 +50,20 @@ public class CaptureDataJob implements SimpleJob {
 //                }
                 InputStream in = null;
                 byte[] data = null;
-                try {
-                    in = new FileInputStream(capture.getCaptureUrl());
-                    data = new byte[in.available()];
-                    in.read(data);
-                    in.close();
-                    String encodeToString = Base64Utils.encodeToString(data);
-                    capture.setSpotImgPath(encodeToString);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if(capture.getCaptureUrl() != null && !"".equals(capture.getCaptureUrl())) {
+                    try {
+                        File dir = new File(capture.getCaptureUrl());
+                        if (dir.exists()) {
+                            in = new FileInputStream(capture.getCaptureUrl());
+                            data = new byte[in.available()];
+                            in.read(data);
+                            in.close();
+                            String encodeToString = Base64Utils.encodeToString(data);
+                            capture.setSpotImgPath(encodeToString);
+                        }
+                    } catch (Exception e) {
+                        logger.info("获取图片base64失败：" + e, e.toString());
+                    }
                 }
             }
             Map<String, Object> parm = new HashMap<>();
