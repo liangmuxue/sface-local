@@ -51,7 +51,7 @@
             opendoor_mode AS opendoorMode,
             result_code AS resultCode,
             capture_url AS captureUrl,
-            compare_date AS compareTime
+            compare_date AS compareDate
         FROM sface_capture c
         LEFT JOIN sface_device d ON c.device_id = d.device_id
         LEFT JOIN sface_capture_time ct ON 1=1
