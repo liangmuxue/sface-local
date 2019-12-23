@@ -85,7 +85,7 @@ public class NioClientHandler extends SimpleChannelInboundHandler<Object> {
      */
 //    @Override
 //    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-//        System.out.println("服务端接收数据完毕..");
+//        logger.info("服务端接收数据完毕..");
 //    }
 
     /**

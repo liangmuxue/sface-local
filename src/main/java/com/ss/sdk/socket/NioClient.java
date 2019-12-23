@@ -130,7 +130,7 @@ public class NioClient implements  Runnable{
         isChannelPrepared=false;
         isClose=false;
         group.shutdownGracefully();
-        System.out.println("重启!");
+        logger.info("重启!");
     }
 
     public   void close(){

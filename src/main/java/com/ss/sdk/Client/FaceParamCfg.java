@@ -148,7 +148,7 @@ public class FaceParamCfg {
     public class FRemoteCfgCallBackFaceGet implements HCNetSDK.FRemoteConfigCallback {
         @Override
         public void invoke(int dwType, Pointer lpBuffer, int dwBufLen, Pointer pUserData) {
-            System.out.println("长连接回调获取数据,NET_SDK_CALLBACK_TYPE_STATUS:" + dwType);
+            logger.info("长连接回调获取数据,NET_SDK_CALLBACK_TYPE_STATUS:" + dwType);
             switch (dwType) {
                 case 0:// NET_SDK_CALLBACK_TYPE_STATUS
                     HCNetSDK.REMOTECONFIGSTATUS_CARD struCfgStatus = new HCNetSDK.REMOTECONFIGSTATUS_CARD();
@@ -166,10 +166,10 @@ public class FaceParamCfg {
 
                     switch (iStatus) {
                         case 1000:// NET_SDK_CALLBACK_STATUS_SUCCESS
-                            System.out.println("查询人脸参数成功,dwStatus:" + iStatus);
+                            logger.info("查询人脸参数成功,dwStatus:" + iStatus);
                             break;
                         case 1001:
-                            System.out.println("正在查询人脸参数中,dwStatus:" + iStatus);
+                            logger.info("正在查询人脸参数中,dwStatus:" + iStatus);
                             break;
                         case 1002:
                             int iErrorCode = 0;
@@ -178,7 +178,7 @@ public class FaceParamCfg {
                                 int iByte = struCfgStatus.byErrorCode[i] & 0xff;
                                 iErrorCode = iErrorCode + (iByte << ioffset);
                             }
-                            System.out.println("查询人脸参数失败, dwStatus:" + iStatus + "错误号:" + iErrorCode);
+                            logger.info("查询人脸参数失败, dwStatus:" + iStatus + "错误号:" + iErrorCode);
                             break;
                     }
                     break;
@@ -189,7 +189,7 @@ public class FaceParamCfg {
                     pInfoV30.write(0, lpBuffer.getByteArray(0, m_struFaceInfo.size()), 0, m_struFaceInfo.size());
                     m_struFaceInfo.read();
                     String str = new String(m_struFaceInfo.byCardNo).trim();
-                    System.out.println("查询到人脸数据关联的卡号,getCardNo:" + str + ",人脸数据类型:" + m_struFaceInfo.byFaceDataType);
+                    logger.info("查询到人脸数据关联的卡号,getCardNo:" + str + ",人脸数据类型:" + m_struFaceInfo.byFaceDataType);
                     if (m_struFaceInfo.dwFaceLen > 0) {
                         SimpleDateFormat sf = new SimpleDateFormat("yyyyMMddHHmmss");
                         String newName = sf.format(new Date());
@@ -259,7 +259,7 @@ public class FaceParamCfg {
     public class FRemoteCfgCallBackFaceSet implements HCNetSDK.FRemoteConfigCallback {
         @Override
         public void invoke(int dwType, Pointer lpBuffer, int dwBufLen, Pointer pUserData) {
-            System.out.println("长连接回调获取数据,NET_SDK_CALLBACK_TYPE_STATUS:" + dwType);
+            logger.info("长连接回调获取数据,NET_SDK_CALLBACK_TYPE_STATUS:" + dwType);
             switch (dwType) {
                 case 0:// NET_SDK_CALLBACK_TYPE_STATUS
                     HCNetSDK.REMOTECONFIGSTATUS_CARD struCfgStatus = new HCNetSDK.REMOTECONFIGSTATUS_CARD();
@@ -277,10 +277,10 @@ public class FaceParamCfg {
 
                     switch (iStatus) {
                         case 1000:// NET_SDK_CALLBACK_STATUS_SUCCESS
-                            System.out.println("下发人脸参数成功,dwStatus:" + iStatus);
+                            logger.info("下发人脸参数成功,dwStatus:" + iStatus);
                             break;
                         case 1001:
-                            System.out.println("正在下发人脸参数中,dwStatus:" + iStatus);
+                            logger.info("正在下发人脸参数中,dwStatus:" + iStatus);
                             break;
                         case 1002:
                             int iErrorCode = 0;
@@ -289,7 +289,7 @@ public class FaceParamCfg {
                                 int iByte = struCfgStatus.byErrorCode[i] & 0xff;
                                 iErrorCode = iErrorCode + (iByte << ioffset);
                             }
-                            System.out.println("下发人脸参数失败, dwStatus:" + iStatus + "错误号:" + iErrorCode);
+                            logger.info("下发人脸参数失败, dwStatus:" + iStatus + "错误号:" + iErrorCode);
                             break;
                     }
                     break;
@@ -300,7 +300,7 @@ public class FaceParamCfg {
                     pStatusInfo.write(0, lpBuffer.getByteArray(0, m_struFaceStatus.size()), 0, m_struFaceStatus.size());
                     m_struFaceStatus.read();
                     String str = new String(m_struFaceStatus.byCardNo).trim();
-                    System.out.println("下发人脸数据关联的卡号:" + str + ",人脸读卡器状态:" +
+                    logger.info("下发人脸数据关联的卡号:" + str + ",人脸读卡器状态:" +
                             m_struFaceStatus.byCardReaderRecvStatus[0] + ",错误描述:" + new String(m_struFaceStatus.byErrorMsg).trim());
                 default:
                     break;

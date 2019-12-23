@@ -30,8 +30,8 @@ public class MyWebSocket implements ApplicationRunner {
 
         MyWebSocketClient client = new MyWebSocketClient( new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455() );
         boolean f = client.connectBlocking();
-        System.out.println("connectBlocking: "+ f);
-        //判断连接状态,
+        logger.info("connectBlocking: "+ f);
+        //判断连接状态
         if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
             logger.info("成功链接服务器!");
             client.send(propertiesUtil.getTenantId());

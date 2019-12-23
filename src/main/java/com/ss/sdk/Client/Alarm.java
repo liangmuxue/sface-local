@@ -87,7 +87,6 @@ public class Alarm {
         }
         lListenHandle = hCNetSDK.NET_DVR_StartListen_V30(m_sListenIP, (short) iListenPort, fMSFCallBack, pUser);
         int i = hCNetSDK.NET_DVR_GetLastError();
-        System.out.println(i);
         if (lListenHandle.intValue() < 0) {
             logger.info("启动监听失败");
         } else {
