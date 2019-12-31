@@ -14,6 +14,8 @@ public interface DeviceMapper {
 
     List<Device> findAllDevice();
 
+    int updateDevice(List<Device> deviceList);
+
     List<WhiteList> findWhiteList();
 
     int insertIssue(Issue issue);
@@ -28,9 +30,15 @@ public interface DeviceMapper {
 
     int insertCapture(Capture capture);
 
-    List<Capture> findCaptureList();
+    List<Capture> findCommonCaptureList();
 
-    String findMaxTime();
+    List<Capture> findRemoteCaptureList();
 
-    int updateTime(@Param("updateTime") String updateTime);
+    String findCommonMaxTime();
+
+    String findRemoteMaxTime();
+
+    int updateCommonTime(@Param("updateTime") String updateTime);
+
+    int updateRemoteTime(@Param("updateTime") String updateTime);
 }

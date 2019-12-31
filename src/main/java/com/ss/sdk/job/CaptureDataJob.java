@@ -32,22 +32,10 @@ public class CaptureDataJob implements SimpleJob {
     @Override
     public void execute(ShardingContext shardingContext) {
 
-        String maxTime = this.deviceMapper.findMaxTime();
-        List<Capture> captureList = this.deviceMapper.findCaptureList();
-        if (captureList.size() > 0){
-            for (Capture capture: captureList) {
-//                InputStream in = null;
-//                byte[] data = null;
-//                try {
-//                    in = new FileInputStream(capture.getCaptureUrl());
-//                    data = new byte[in.available()];
-//                    String encodeToString = Base64Utils.encodeToString(data);
-//                    capture.setSpotImgPath(encodeToString);
-//                    in.read(data);
-//                    in.close();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
+        String maxCommonTime = this.deviceMapper.findCommonMaxTime();
+        List<Capture> commonCaptureList = this.deviceMapper.findCommonCaptureList();
+        if (commonCaptureList.size() > 0){
+            for (Capture capture: commonCaptureList) {
                 InputStream in = null;
                 byte[] data = null;
                 if(capture.getCaptureUrl() != null && !"".equals(capture.getCaptureUrl())) {
@@ -67,9 +55,9 @@ public class CaptureDataJob implements SimpleJob {
                 }
             }
             Map<String, Object> parm = new HashMap<>();
-            parm.put("captureList", captureList);
+            parm.put("captureList", commonCaptureList);
             String json = JSON.toJSONString(parm);
-            String resultString = baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.UPLOAD_CAPTURE_LIST);
+            String resultString = baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.UPLOAD_COMMON_CAPTURE_LIST);
             String code = null;
             JSONObject faceJson = null;
             if (null != resultString) {
@@ -77,7 +65,43 @@ public class CaptureDataJob implements SimpleJob {
                 code = faceJson.get("code").toString();
             }
             if ("00000000".equals(code)) {
-                this.deviceMapper.updateTime(maxTime);
+                this.deviceMapper.updateCommonTime(maxCommonTime);
+            }
+        }
+        String maxRemoteTime = this.deviceMapper.findRemoteMaxTime();
+        List<Capture> remoteCaptureList = this.deviceMapper.findRemoteCaptureList();
+        if (remoteCaptureList.size() > 0){
+            for (Capture capture: remoteCaptureList) {
+                InputStream in = null;
+                byte[] data = null;
+                if(capture.getCaptureUrl() != null && !"".equals(capture.getCaptureUrl())) {
+                    try {
+                        File dir = new File(capture.getCaptureUrl());
+                        if (dir.exists()) {
+                            in = new FileInputStream(capture.getCaptureUrl());
+                            data = new byte[in.available()];
+                            in.read(data);
+                            in.close();
+                            String encodeToString = Base64Utils.encodeToString(data);
+                            capture.setSpotImgPath(encodeToString);
+                        }
+                    } catch (Exception e) {
+                        logger.info("获取图片base64失败：" + e, e.toString());
+                    }
+                }
+            }
+            Map<String, Object> parm = new HashMap<>();
+            parm.put("captureList", remoteCaptureList);
+            String json = JSON.toJSONString(parm);
+            String resultString = baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.UPLOAD_REMOTE_CAPTURE_LIST);
+            String code = null;
+            JSONObject faceJson = null;
+            if (null != resultString) {
+                faceJson = JSONObject.parseObject(resultString);
+                code = faceJson.get("code").toString();
+            }
+            if ("00000000".equals(code)) {
+                this.deviceMapper.updateRemoteTime(maxRemoteTime);
             }
         }
     }

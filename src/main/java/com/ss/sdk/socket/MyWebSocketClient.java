@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.ss.sdk.Client.CardCfg;
 import com.ss.sdk.Client.FaceParamCfg;
 import com.ss.sdk.Client.RemoteControl;
+import com.ss.sdk.mapper.DeviceMapper;
+import com.ss.sdk.model.Capture;
 import com.ss.sdk.model.Issue;
 import com.ss.sdk.utils.ApplicationContextProvider;
 import com.ss.sdk.utils.JedisUtil;
@@ -17,6 +19,7 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
+import javax.annotation.Resource;
 import java.net.URI;
 
 public class MyWebSocketClient extends WebSocketClient {
@@ -28,6 +31,7 @@ public class MyWebSocketClient extends WebSocketClient {
     private CardCfg cardCfg = ApplicationContextProvider.getBean(CardCfg .class);
     private FaceParamCfg faceParamCfg = ApplicationContextProvider.getBean(FaceParamCfg .class);
     private PropertiesUtil propertiesUtil = ApplicationContextProvider.getBean(PropertiesUtil.class);
+    private DeviceMapper deviceMapper = ApplicationContextProvider.getBean(DeviceMapper.class);
 
     private static volatile boolean isChannelPrepared = false;
 
@@ -60,6 +64,10 @@ public class MyWebSocketClient extends WebSocketClient {
                         logger.info("远程开门成功");
                     } else {
                         logger.info("远程开门失败");
+                        Capture capture = new Capture();
+                        capture.setOpendoorMode(2);
+                        capture.setResultCode(0);
+                        MyWebSocketClient.this.deviceMapper.insertCapture(capture);
                     }
                 }
                 if ("issue".equals(command) && deviceId != null && !"".equals(deviceId) && peopleId != null && !"".equals(peopleId) && captureUrl != null && !"".equals(captureUrl)) {

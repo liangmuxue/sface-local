@@ -13,6 +13,7 @@ public class JobProperties {
     private String shardingItemParameters;
     private String getIssueDataJob;
     private String captureDataJob;
+    private String ipJob;
 
     public int getShardingTotalCount() {
         return shardingTotalCount;
@@ -44,5 +45,13 @@ public class JobProperties {
 
     public void setCaptureDataJob(String captureDataJob) {
         this.captureDataJob = captureDataJob;
+    }
+
+    public String getIpJob() {
+        return ipJob;
+    }
+
+    public void setIpJob(String ipJob) {
+        this.ipJob = ipJob;
     }
 }

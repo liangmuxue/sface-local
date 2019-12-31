@@ -29,6 +29,8 @@ public class MyJobRunner implements ApplicationRunner {
 
         this.stockSimpleJob.addSimpleJobScheduler(CaptureDataJob.class, jobProperties.getCaptureDataJob(), tc, sp, true);
 
+        this.stockSimpleJob.addSimpleJobScheduler(IpJob.class, jobProperties.getIpJob(), tc, sp, true);
+
     }
 
 }

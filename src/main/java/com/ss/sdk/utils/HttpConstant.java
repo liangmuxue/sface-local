@@ -8,5 +8,9 @@ public class HttpConstant {
 
     public static String FACE_LIST_RESULT = "/resident/issue/status";
 
-    public static String UPLOAD_CAPTURE_LIST = "/collect/capture/snap";
+    public static String UPLOAD_COMMON_CAPTURE_LIST = "/collect/capture/commonSnap";
+
+    public static String UPLOAD_REMOTE_CAPTURE_LIST = "/collect/capture/remoteSnap";
+
+    public static String DEVICE_STATE = "/camera/updateCameraState";
 }

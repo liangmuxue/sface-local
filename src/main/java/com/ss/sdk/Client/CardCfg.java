@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -106,6 +107,77 @@ public class CardCfg {
                     this.deviceMapper.delWhiteList(issue);
                 }
             }
+        if (!hCNetSDK.NET_DVR_StopRemoteConfig(lHandle)) {
+            iErr = hCNetSDK.NET_DVR_GetLastError();
+            logger.info("断开长连接失败，错误号：" + iErr);
+            return;
+        }
+        logger.info("断开长连接成功!");
+    }
+
+    @RequestMapping(value = {"/setCard"}, method = {RequestMethod.POST})
+    public void setCard() {
+        NativeLong lUserID = new NativeLong();
+        lUserID.setValue(0);
+        int iErr = 0;
+        HCNetSDK.NET_DVR_CARD_CFG_COND m_struCardInputParam = new HCNetSDK.NET_DVR_CARD_CFG_COND();
+        m_struCardInputParam.read();
+        m_struCardInputParam.dwSize = m_struCardInputParam.size();
+        m_struCardInputParam.dwCardNum = 1;
+        m_struCardInputParam.byCheckCardNo = 1;
+        Pointer lpInBuffer = m_struCardInputParam.getPointer();
+        m_struCardInputParam.write();
+        Pointer pUserData = null;
+        fRemoteCfgCallBackCardSet = new FRemoteCfgCallBackCardSet();
+        NativeLong lHandle = hCNetSDK.NET_DVR_StartRemoteConfig(lUserID, HCNetSDK.NET_DVR_SET_CARD_CFG_V50, lpInBuffer, m_struCardInputParam.size(), fRemoteCfgCallBackCardSet, pUserData);
+        if (lHandle.intValue() < 0) {
+            logger.info("建立长连接失败，错误号：" + iErr);
+            return;
+        }
+        logger.info("建立设置卡参数长连接成功!");
+
+        HCNetSDK.NET_DVR_CARD_CFG_V50 struCardInfo = new HCNetSDK.NET_DVR_CARD_CFG_V50(); //卡参数
+        struCardInfo.read();
+        struCardInfo.dwSize = struCardInfo.size();
+        struCardInfo.dwModifyParamType = 0x00000001;
+        String number = String.valueOf(546);
+        for (int i = 0; i < number.length(); i++) {
+            struCardInfo.byCardNo[i] = number.getBytes()[i];
+        }
+        struCardInfo.byCardValid = 0;
+        struCardInfo.byCardType = 1;
+        struCardInfo.byLeaderCard = 0;
+        struCardInfo.byDoorRight[0] = 1; //门1有权限
+        struCardInfo.wCardRightPlan[0].wRightPlan[0] = 1; //门1关联卡参数计划模板1
+        struCardInfo.dwCardUserId = 546;
+        struCardInfo.byCardModelType = 0;
+        //卡有效期
+        struCardInfo.struValid.byEnable = 1;
+        struCardInfo.struValid.struBeginTime.wYear = 2018;
+        struCardInfo.struValid.struBeginTime.byMonth = 12;
+        struCardInfo.struValid.struBeginTime.byDay = 1;
+        struCardInfo.struValid.struBeginTime.byHour = 0;
+        struCardInfo.struValid.struBeginTime.byMinute = 0;
+        struCardInfo.struValid.struBeginTime.bySecond = 0;
+        struCardInfo.struValid.struEndTime.wYear = 2020;
+        struCardInfo.struValid.struEndTime.byMonth = 12;
+        struCardInfo.struValid.struEndTime.byDay = 1;
+        struCardInfo.struValid.struEndTime.byHour = 0;
+        struCardInfo.struValid.struEndTime.byMinute = 0;
+        struCardInfo.struValid.struEndTime.bySecond = 0;
+        struCardInfo.dwMaxSwipeTime = 0; //无次数限制
+        struCardInfo.dwSwipeTime = 0;
+        struCardInfo.byCardPassword = "123456".getBytes();
+        struCardInfo.dwEmployeeNo = 1;
+        struCardInfo.write();
+        Pointer pSendBufSet = struCardInfo.getPointer();
+        if (!hCNetSDK.NET_DVR_SendRemoteConfig(lHandle, 0x3, pSendBufSet, struCardInfo.size())) {
+            iErr = hCNetSDK.NET_DVR_GetLastError();
+            logger.info("ENUM_ACS_SEND_DATA失败，错误号：" + iErr);
+            return;
+        }
+        else {
+        }
         if (!hCNetSDK.NET_DVR_StopRemoteConfig(lHandle)) {
             iErr = hCNetSDK.NET_DVR_GetLastError();
             logger.info("断开长连接失败，错误号：" + iErr);

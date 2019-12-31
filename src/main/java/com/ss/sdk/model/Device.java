@@ -17,6 +17,8 @@ public class Device {
     private String password;
     private Integer state;
     private Integer isDelete;
+    private String productCode;
+    private Integer cameraState;
 
     public Integer getId() {
         return id;
@@ -90,4 +92,19 @@ public class Device {
         this.isDelete = isDelete;
     }
 
+    public String getProductCode() {
+        return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+    }
+
+    public Integer getCameraState() {
+        return cameraState;
+    }
+
+    public void setCameraState(Integer cameraState) {
+        this.cameraState = cameraState;
+    }
 }
