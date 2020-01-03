@@ -16,6 +16,7 @@ public class Issue {
     private String returnResult;
     private Integer taskType;
     private Integer issueStatus;
+    private String errorMessage;
 
     public Integer getId() {
         return id;
@@ -79,5 +80,13 @@ public class Issue {
 
     public void setIssueStatus(Integer issueStatus) {
         this.issueStatus = issueStatus;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

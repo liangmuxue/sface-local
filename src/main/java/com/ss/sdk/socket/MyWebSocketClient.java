@@ -91,25 +91,24 @@ public class MyWebSocketClient extends WebSocketClient {
     public void onClose(int arg0, String arg1, boolean arg2) {
         logger.info("客户端已关闭!");
         logger.info("开始尝试重新连接...");
-        if (!isRepeatPrepared){
-            return;
-        }
-        isChannelPrepared = false;
-        while (!isChannelPrepared) {
-            try {
-                isRepeatPrepared = false;
-                MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
-                Thread.sleep(10*1000);
-                if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                    logger.info("成功链接服务器!");
-                    client.send(propertiesUtil.getTenantId());
-                }
-                isChannelPrepared = client.connectBlocking();
-                isRepeatPrepared = client.connectBlocking();
-            } catch (Exception e) {
-                e.printStackTrace();
-                logger.info("重新连接失败,请检查网络!");
+        reConnect();
+    }
+
+    private void reConnect() {
+        try {
+            Thread.sleep(10*1000);
+            MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
+            boolean f = client.connectBlocking();
+            logger.info("connectBlocking: "+ f);
+            if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+                logger.info("成功链接服务器!");
+                client.send(propertiesUtil.getTenantId());
+            } else {
+                reConnect();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            reConnect();
         }
     }
 }

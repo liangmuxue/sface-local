@@ -37,10 +37,13 @@ public class FaceParamCfg {
     FRemoteCfgCallBackFaceGet fRemoteCfgCallBackFaceGet;
     FRemoteCfgCallBackFaceSet fRemoteCfgCallBackFaceSet;
 
+    private Issue issue;
+
     @Resource
     private DeviceMapper deviceMapper;
 
     public void jBtnSetFaceCfg(NativeLong lUserID, Issue issue) {
+        this.issue = issue;
         int iErr = 0;
         //设置人脸参数
         HCNetSDK.NET_DVR_FACE_PARAM_COND m_struFaceSetParam = new HCNetSDK.NET_DVR_FACE_PARAM_COND();
@@ -125,16 +128,12 @@ public class FaceParamCfg {
         //ENUM_ACS_INTELLIGENT_IDENTITY_DATA = 9,  //智能身份识别终端数据类型，下发人脸图片数据
         if (!hCNetSDK.NET_DVR_SendRemoteConfig(lHandle, 0x9, pSendBufSet, struFaceInfo.size())) {
             iErr = hCNetSDK.NET_DVR_GetLastError();
-            issue.setIssueStatus(0);
-            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
-            this.deviceMapper.insertIssue(issue);
             logger.info("NET_DVR_SendRemoteConfig失败，错误号：" + iErr);
-            return;
-        } else {
-            issue.setIssueStatus(1);
-            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
-            this.deviceMapper.insertIssue(issue);
-            this.deviceMapper.insertWhiteList(issue);
+        }
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         if (!hCNetSDK.NET_DVR_StopRemoteConfig(lHandle)) {
             iErr = hCNetSDK.NET_DVR_GetLastError();
@@ -142,7 +141,6 @@ public class FaceParamCfg {
             return;
         }
         logger.info("断开长连接成功!");
-
     }
 
     public class FRemoteCfgCallBackFaceGet implements HCNetSDK.FRemoteConfigCallback {
@@ -278,6 +276,10 @@ public class FaceParamCfg {
                     switch (iStatus) {
                         case 1000:// NET_SDK_CALLBACK_STATUS_SUCCESS
                             logger.info("下发人脸参数成功,dwStatus:" + iStatus);
+                            issue.setIssueStatus(1);
+                            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                            FaceParamCfg.this.deviceMapper.insertIssue(issue);
+                            FaceParamCfg.this.deviceMapper.insertWhiteList(issue);
                             break;
                         case 1001:
                             logger.info("正在下发人脸参数中,dwStatus:" + iStatus);
@@ -290,6 +292,10 @@ public class FaceParamCfg {
                                 iErrorCode = iErrorCode + (iByte << ioffset);
                             }
                             logger.info("下发人脸参数失败, dwStatus:" + iStatus + "错误号:" + iErrorCode);
+                            issue.setIssueStatus(2);
+                            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                            issue.setErrorMessage("人脸检测失败");
+                            FaceParamCfg.this.deviceMapper.insertIssue(issue);
                             break;
                     }
                     break;
@@ -301,7 +307,7 @@ public class FaceParamCfg {
                     m_struFaceStatus.read();
                     String str = new String(m_struFaceStatus.byCardNo).trim();
                     logger.info("下发人脸数据关联的卡号:" + str + ",人脸读卡器状态:" +
-                            m_struFaceStatus.byCardReaderRecvStatus[0] + ",错误描述:" + new String(m_struFaceStatus.byErrorMsg).trim());
+                            m_struFaceStatus.byCardReaderRecvStatus[0] + ",错误描述:" + new String(m_struFaceStatus.byErrorMsg).trim());;
                 default:
                     break;
             }

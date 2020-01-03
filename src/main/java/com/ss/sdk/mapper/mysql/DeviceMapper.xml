@@ -22,8 +22,8 @@
     </select>
 
     <insert id="insertIssue" parameterType="com.ss.sdk.model.Issue">
-        INSERT INTO sface_issue (people_id, device_id, people_face_path, issue_time, issueStatus)
-        VALUES (#{peopleId}, #{productCode}, #{peopleFacePath}, #{issueTime}, #{issueStatus} )
+        INSERT INTO sface_issue (people_id, device_id, people_face_path, issue_time, issueStatus, fail_reason)
+        VALUES (#{peopleId}, #{productCode}, #{peopleFacePath}, #{issueTime}, #{issueStatus}, #{errorMessage} )
     </insert>
 
     <insert id="insertWhiteList" parameterType="com.ss.sdk.model.Issue">
@@ -32,7 +32,7 @@
     </insert>
 
     <select id="findIssueList" resultType="com.ss.sdk.model.Issue">
-        SELECT id, people_id AS peopleId, device_id AS deviceId, issueStatus FROM sface_issue WHERE return_result = 0
+        SELECT id, people_id AS peopleId, device_id AS productCode, issueStatus, fail_reason AS errorMessage FROM sface_issue WHERE return_result = 0
     </select>
 
     <update id="updateIssue" parameterType="java.util.List">
@@ -46,7 +46,7 @@
     </update>
 
     <delete id="delWhiteList" parameterType="com.ss.sdk.model.Issue">
-        DELETE FROM sface_white_list WHERE people_id = #{peopleId} AND device_id = #{deviceId}
+        DELETE FROM sface_white_list WHERE people_id = #{peopleId} AND device_id = #{productCode}
     </delete>
 
     <insert id="insertCapture" parameterType="com.ss.sdk.model.Capture">

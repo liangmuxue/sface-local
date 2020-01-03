@@ -9,6 +9,7 @@ import com.sun.jna.Pointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -107,6 +108,11 @@ public class CardCfg {
                     this.deviceMapper.delWhiteList(issue);
                 }
             }
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (!hCNetSDK.NET_DVR_StopRemoteConfig(lHandle)) {
             iErr = hCNetSDK.NET_DVR_GetLastError();
             logger.info("断开长连接失败，错误号：" + iErr);
@@ -116,7 +122,7 @@ public class CardCfg {
     }
 
     @RequestMapping(value = {"/setCard"}, method = {RequestMethod.POST})
-    public void setCard() {
+    public void setCard(String card) {
         NativeLong lUserID = new NativeLong();
         lUserID.setValue(0);
         int iErr = 0;
@@ -140,7 +146,7 @@ public class CardCfg {
         struCardInfo.read();
         struCardInfo.dwSize = struCardInfo.size();
         struCardInfo.dwModifyParamType = 0x00000001;
-        String number = String.valueOf(546);
+        String number = String.valueOf(card);
         for (int i = 0; i < number.length(); i++) {
             struCardInfo.byCardNo[i] = number.getBytes()[i];
         }
