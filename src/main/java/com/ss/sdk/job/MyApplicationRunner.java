@@ -43,26 +43,6 @@ public class MyApplicationRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments var1) {
 
-//        //设置HCNetSDKCom组件库所在路径
-//        String strPathCom = "/home/program/ss-cplat-client/lib/HCNetSDKCom";
-//        HCNetSDK.NET_DVR_LOCAL_SDK_PATH struComPath = new HCNetSDK.NET_DVR_LOCAL_SDK_PATH();
-//        System.arraycopy(strPathCom.getBytes(), 0, struComPath.sPath, 0, strPathCom.length());
-//        struComPath.write();
-//        hCNetSDK.NET_DVR_SetSDKInitCfg(2, struComPath.getPointer());
-//
-////设置libcrypto.so所在路径
-//        HCNetSDK.BYTE_ARRAY ptrByteArrayCrypto = new HCNetSDK.BYTE_ARRAY(256);
-//        String strPathCrypto = "/home/program/ss-cplat-client/lib/libcrypto.so";
-//        System.arraycopy(strPathCrypto.getBytes(), 0, ptrByteArrayCrypto.byValue, 0, strPathCrypto.length());
-//        ptrByteArrayCrypto.write();
-//        hCNetSDK.NET_DVR_SetSDKInitCfg(3, ptrByteArrayCrypto.getPointer());
-//
-////设置libssl.so所在路径
-//        HCNetSDK.BYTE_ARRAY ptrByteArraySsl = new HCNetSDK.BYTE_ARRAY(256);
-//        String strPathSsl = "/home/program/ss-cplat-client/lib/libssl.so";
-//        System.arraycopy(strPathSsl.getBytes(), 0, ptrByteArraySsl.byValue, 0, strPathSsl.length());
-//        ptrByteArraySsl.write();
-//        hCNetSDK.NET_DVR_SetSDKInitCfg(4, ptrByteArraySsl.getPointer());
         logger.info("开始初始化sdk");
         try {
             hCNetSDK.NET_DVR_Init();

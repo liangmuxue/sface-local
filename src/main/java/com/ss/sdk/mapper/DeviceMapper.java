@@ -14,6 +14,8 @@ public interface DeviceMapper {
 
     List<Device> findAllDevice();
 
+    Device findDevice(Issue issue);
+
     int updateDevice(List<Device> deviceList);
 
     List<WhiteList> findWhiteList();

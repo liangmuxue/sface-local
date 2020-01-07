@@ -1,11 +1,10 @@
 package com.ss.sdk.socket;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ss.sdk.Client.CardCfg;
-import com.ss.sdk.Client.FaceParamCfg;
-import com.ss.sdk.Client.RemoteControl;
+import com.ss.sdk.Client.*;
 import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.model.Capture;
+import com.ss.sdk.model.Device;
 import com.ss.sdk.model.Issue;
 import com.ss.sdk.utils.ApplicationContextProvider;
 import com.ss.sdk.utils.JedisUtil;
@@ -22,6 +21,8 @@ import org.java_websocket.handshake.ServerHandshake;
 import javax.annotation.Resource;
 import java.net.URI;
 
+import static com.ss.sdk.job.MyApplicationRunner.hCNetSDK;
+
 public class MyWebSocketClient extends WebSocketClient {
 
     private static final Logger logger = LogManager.getLogger(NioClientHandler.class);
@@ -32,6 +33,8 @@ public class MyWebSocketClient extends WebSocketClient {
     private FaceParamCfg faceParamCfg = ApplicationContextProvider.getBean(FaceParamCfg .class);
     private PropertiesUtil propertiesUtil = ApplicationContextProvider.getBean(PropertiesUtil.class);
     private DeviceMapper deviceMapper = ApplicationContextProvider.getBean(DeviceMapper.class);
+    private Alarm alarm = ApplicationContextProvider.getBean(Alarm.class);
+    private Basics basics = ApplicationContextProvider.getBean(Basics.class);
 
     private static volatile boolean isChannelPrepared = false;
 
@@ -68,6 +71,24 @@ public class MyWebSocketClient extends WebSocketClient {
                         capture.setOpendoorMode(2);
                         capture.setResultCode(0);
                         MyWebSocketClient.this.deviceMapper.insertCapture(capture);
+                        int iErr = hCNetSDK.NET_DVR_GetLastError();
+                        logger.info("建立长连接失败，错误号：" + iErr);
+                        if(iErr == 47){
+                            Issue issue = new Issue();
+                            issue.setProductCode(deviceId);
+                            Device device = MyWebSocketClient.this.deviceMapper.findDevice(issue);
+                            NativeLong userId = MyWebSocketClient.this.basics.login(device.getIp(), device.getPort(), device.getUserName(), device.getPassword());
+                            if (userId.intValue() != -1) {
+                                MyWebSocketClient.this.jedisUtil.set(String.valueOf(device.getCplatDeviceId()), userId);
+                            }
+                            int alarmHandle = MyWebSocketClient.this.alarm.SetupAlarmChan(userId);
+                            if (alarmHandle == -1) {
+                                int error = hCNetSDK.NET_DVR_GetLastError();
+                                logger.info("设备" + device.getCplatDeviceId() + "布防失败，错误码：" + error);
+                            } else {
+                                logger.info("设备" + device.getCplatDeviceId() + "布防成功");
+                            }
+                        }
                     }
                 }
                 if ("issue".equals(command) && deviceId != null && !"".equals(deviceId) && peopleId != null && !"".equals(peopleId) && captureUrl != null && !"".equals(captureUrl)) {
@@ -100,15 +121,15 @@ public class MyWebSocketClient extends WebSocketClient {
             MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
             boolean f = client.connectBlocking();
             logger.info("connectBlocking: "+ f);
+            if (!f){
+                reconnect();
+            }
             if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 logger.info("成功链接服务器!");
                 client.send(propertiesUtil.getTenantId());
-            } else {
-                reConnect();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            reConnect();
         }
     }
 }

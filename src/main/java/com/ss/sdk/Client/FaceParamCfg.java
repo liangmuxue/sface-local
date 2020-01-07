@@ -2,7 +2,9 @@ package com.ss.sdk.Client;
 
 import com.ss.sdk.job.MyApplicationRunner;
 import com.ss.sdk.mapper.DeviceMapper;
+import com.ss.sdk.model.Device;
 import com.ss.sdk.model.Issue;
+import com.ss.sdk.utils.JedisUtil;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import org.slf4j.Logger;
@@ -42,6 +44,15 @@ public class FaceParamCfg {
     @Resource
     private DeviceMapper deviceMapper;
 
+    @Resource
+    private Basics basics;
+
+    @Resource
+    private JedisUtil jedisUtil;
+
+    @Resource
+    private Alarm alarm;
+
     public void jBtnSetFaceCfg(NativeLong lUserID, Issue issue) {
         this.issue = issue;
         int iErr = 0;
@@ -63,6 +74,20 @@ public class FaceParamCfg {
         if (lHandle.intValue() < 0) {
             iErr = hCNetSDK.NET_DVR_GetLastError();
             logger.info("建立长连接失败，错误号：" + iErr);
+            if(iErr == 47){
+                Device device = this.deviceMapper.findDevice(issue);
+                NativeLong userId = basics.login(device.getIp(), device.getPort(), device.getUserName(), device.getPassword());
+                if (userId.intValue() != -1) {
+                    jedisUtil.set(String.valueOf(device.getCplatDeviceId()), userId);
+                }
+                int alarmHandle = alarm.SetupAlarmChan(userId);
+                if (alarmHandle == -1) {
+                    int error = hCNetSDK.NET_DVR_GetLastError();
+                    logger.info("设备" + device.getCplatDeviceId() + "布防失败，错误码：" + error);
+                } else {
+                    logger.info("设备" + device.getCplatDeviceId() + "布防成功");
+                }
+            }
             return;
         }
         logger.info("建立设置卡参数长连接成功!");
@@ -129,6 +154,12 @@ public class FaceParamCfg {
         if (!hCNetSDK.NET_DVR_SendRemoteConfig(lHandle, 0x9, pSendBufSet, struFaceInfo.size())) {
             iErr = hCNetSDK.NET_DVR_GetLastError();
             logger.info("NET_DVR_SendRemoteConfig失败，错误号：" + iErr);
+            if (iErr == 17) {
+                issue.setIssueStatus(2);
+                issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                issue.setErrorMessage("人脸检测失败");
+                FaceParamCfg.this.deviceMapper.insertIssue(issue);
+            }
         }
         try {
             Thread.sleep(2000);

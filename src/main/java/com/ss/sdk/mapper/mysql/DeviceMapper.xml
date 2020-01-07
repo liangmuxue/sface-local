@@ -7,6 +7,11 @@
         is_delete = 1
     </select>
 
+    <select id="findDevice" parameterType="com.ss.sdk.model.Issue" resultType="com.ss.sdk.model.Device">
+        SELECT cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
+        is_delete = 1 AND cplat_device_id = #{productCode}
+    </select>
+
     <update id="updateDevice" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" separator=";" close="">
             update sface_device
