@@ -112,7 +112,17 @@ public class MyWebSocketClient extends WebSocketClient {
     public void onClose(int arg0, String arg1, boolean arg2) {
         logger.info("客户端已关闭!");
         logger.info("开始尝试重新连接...");
-        reConnect();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(10 * 1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                reConnect();
+            }
+        }).start();
     }
 
     private void reConnect() {
@@ -121,9 +131,6 @@ public class MyWebSocketClient extends WebSocketClient {
             MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
             boolean f = client.connectBlocking();
             logger.info("connectBlocking: "+ f);
-            if (!f){
-                reconnect();
-            }
             if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 logger.info("成功链接服务器!");
                 client.send(propertiesUtil.getTenantId());

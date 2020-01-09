@@ -4,21 +4,17 @@ import com.ss.sdk.job.MyApplicationRunner;
 import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.model.Device;
 import com.ss.sdk.model.Issue;
-import com.ss.sdk.socket.ClientCache;
 import com.ss.sdk.utils.JedisUtil;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -332,7 +328,6 @@ public class CardCfg {
             logger.info("长连接回调获取数据,NET_SDK_CALLBACK_TYPE_STATUS:" + dwType);
             switch (dwType) {
                 case 0: //NET_SDK_CALLBACK_TYPE_STATUS
-                    logger.info("进入:" + dwType);
                     HCNetSDK.REMOTECONFIGSTATUS_CARD struCfgStatus = new HCNetSDK.REMOTECONFIGSTATUS_CARD();
                     struCfgStatus.write();
                     Pointer pCfgStatus = struCfgStatus.getPointer();
@@ -365,25 +360,13 @@ public class CardCfg {
                     }
                     break;
                 case 2: //NET_SDK_CALLBACK_TYPE_DATA
-                    logger.info("进入:" + dwType);
                     HCNetSDK.NET_DVR_CARD_CFG_V50 m_struCardInfo = new HCNetSDK.NET_DVR_CARD_CFG_V50();
-                    logger.info("阶段:1");
-                    try {
-                        m_struCardInfo.write();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        logger.info("错误:" + e.toString(), e);
-                    }
-                    logger.info("阶段:2");
+                    m_struCardInfo.write();
                     Pointer pInfoV30 = m_struCardInfo.getPointer();
-                    logger.info("阶段:3");
                     pInfoV30.write(0, lpBuffer.getByteArray(0, m_struCardInfo.size()), 0, m_struCardInfo.size());
-                    logger.info("阶段:4");
                     m_struCardInfo.read();
-                    logger.info("阶段:5");
                     String str = new String(m_struCardInfo.byCardNo);
                     try {
-                        logger.info("阶段:6");
                         String srtName = new String(m_struCardInfo.byName, "GBK").trim(); //姓名
                         logger.info("查询到的卡号,getCardNo:" + str + "姓名:" + srtName);
                         cardNos.add(str);
