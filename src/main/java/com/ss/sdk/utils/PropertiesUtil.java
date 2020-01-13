@@ -25,6 +25,12 @@ public class PropertiesUtil {
     private String serverIp;
     private String socketPort;
     private String webSocketUrl;
+    private String webSocketUrlLL;
+    private String userNameLL;
+    private String passwordLL;
+
+    public PropertiesUtil() {
+    }
 
     public String getIp() {
         return ip;
@@ -104,5 +110,29 @@ public class PropertiesUtil {
 
     public void setWebSocketUrl(String webSocketUrl) {
         this.webSocketUrl = webSocketUrl;
+    }
+
+    public String getWebSocketUrlLL() {
+        return webSocketUrlLL;
+    }
+
+    public void setWebSocketUrlLL(String webSocketUrlLL) {
+        this.webSocketUrlLL = webSocketUrlLL;
+    }
+
+    public String getUserNameLL() {
+        return userNameLL;
+    }
+
+    public void setUserNameLL(String userNameLL) {
+        this.userNameLL = userNameLL;
+    }
+
+    public String getPasswordLL() {
+        return passwordLL;
+    }
+
+    public void setPasswordLL(String passwordLL) {
+        this.passwordLL = passwordLL;
     }
 }

@@ -25,7 +25,7 @@ import static com.ss.sdk.job.MyApplicationRunner.hCNetSDK;
 
 public class MyWebSocketClient extends WebSocketClient {
 
-    private static final Logger logger = LogManager.getLogger(NioClientHandler.class);
+    private static final Logger logger = LogManager.getLogger(MyWebSocketClient.class);
 
     private JedisUtil jedisUtil = ApplicationContextProvider.getBean(JedisUtil .class);
     private RemoteControl remoteControl = ApplicationContextProvider.getBean(RemoteControl .class);
@@ -36,23 +36,18 @@ public class MyWebSocketClient extends WebSocketClient {
     private Alarm alarm = ApplicationContextProvider.getBean(Alarm.class);
     private Basics basics = ApplicationContextProvider.getBean(Basics.class);
 
-    private static volatile boolean isChannelPrepared = false;
-
-    private static volatile boolean isRepeatPrepared = true;
-
     public MyWebSocketClient(URI serverUri, Draft protocolDraft) {
         super(serverUri, protocolDraft);
     }
 
     @Override
     public void onOpen(ServerHandshake arg0) {
-        isRepeatPrepared = false;
         logger.info("开始建立链接...");
     }
 
     @Override
     public void onMessage(String message) {
-        logger.info("检测到服务器请求...message：" + message);
+        logger.info("检测到云端服务器请求...message：" + message);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -96,6 +91,7 @@ public class MyWebSocketClient extends WebSocketClient {
                     issue.setPeopleId(Integer.valueOf(peopleId));
                     issue.setPeopleFacePath(captureUrl);
                     issue.setTaskType(1);
+                    issue.setProductCode(deviceId);
                     cardCfg.setCardInfo((NativeLong)jedisUtil.get(deviceId), issue);
                     faceParamCfg.jBtnSetFaceCfg((NativeLong)jedisUtil.get(deviceId), issue);
                 }
@@ -127,12 +123,11 @@ public class MyWebSocketClient extends WebSocketClient {
 
     private void reConnect() {
         try {
-            Thread.sleep(10*1000);
             MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
             boolean f = client.connectBlocking();
             logger.info("connectBlocking: "+ f);
             if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                logger.info("成功链接服务器!");
+                logger.info("成功链接云端服务器!");
                 client.send(propertiesUtil.getTenantId());
             }
         } catch (Exception e) {

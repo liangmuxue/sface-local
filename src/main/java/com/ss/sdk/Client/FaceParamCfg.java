@@ -34,7 +34,7 @@ import static com.ss.sdk.job.MyApplicationRunner.hCNetSDK;
 @Component
 public class FaceParamCfg {
 
-    public Logger logger = LoggerFactory.getLogger(MyApplicationRunner.class);
+    public Logger logger = LoggerFactory.getLogger(FaceParamCfg.class);
 
     FRemoteCfgCallBackFaceGet fRemoteCfgCallBackFaceGet;
     FRemoteCfgCallBackFaceSet fRemoteCfgCallBackFaceSet;

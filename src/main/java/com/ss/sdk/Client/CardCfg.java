@@ -31,7 +31,7 @@ import static com.ss.sdk.job.MyApplicationRunner.hCNetSDK;
 @Component
 public class CardCfg {
 
-    public Logger logger = LoggerFactory.getLogger(MyApplicationRunner.class);
+    public Logger logger = LoggerFactory.getLogger(CardCfg.class);
 
     @Resource
     private DeviceMapper deviceMapper;
