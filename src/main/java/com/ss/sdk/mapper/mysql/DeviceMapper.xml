@@ -2,13 +2,47 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ss.sdk.mapper.DeviceMapper">
 
+    <!--查询所有设备-->
     <select id="findAllDevice" resultType="com.ss.sdk.model.Device">
         SELECT cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
         is_delete = 1
     </select>
+    <!--查询所有海康设备-->
+    <select id="findAllHivDevice" resultType="com.ss.sdk.model.Device">
+        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
+        is_delete = 1 AND device_type = 1
+    </select>
+
+    <!--查询海康门禁机设备-->
+    <select id="findHivAccessDevice" resultType="com.ss.sdk.model.Device">
+        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
+        is_delete = 1 AND device_type = 1 AND device_type_detail = 101
+    </select>
+
+    <!--查询海康门禁主机设备-->
+    <select id="findHivHostDevice" resultType="com.ss.sdk.model.Device">
+        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
+        is_delete = 1 AND device_type = 1 AND device_type_detail = 102
+    </select>
+
+    <!--查询海康摄像机设备-->
+    <select id="findHivVideoDevice" resultType="com.ss.sdk.model.Device">
+        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
+        is_delete = 1 AND device_type = 1 AND device_type_detail = 103
+    </select>
+
+    <!--查询海康摄像机体温检测设备-->
+    <select id="findHivVideoTempDevice" resultType="com.ss.sdk.model.Device">
+        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
+        is_delete = 1 AND device_type = 1 AND device_type_detail = 103 AND device_function = 2
+    </select>
 
     <select id="findDevice" parameterType="com.ss.sdk.model.Issue" resultType="com.ss.sdk.model.Device">
-        SELECT cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
+        SELECT
+        cplat_device_id AS cplatDeviceId, device_id AS deviceId, ip, port, user_name AS userName, password, state, device_type AS deviceType, device_function AS deviceFunction
+        FROM
+        sface_device
+        WHERE
         is_delete = 1 AND cplat_device_id = #{productCode}
     </select>
 
@@ -53,10 +87,10 @@
     <delete id="delWhiteList" parameterType="com.ss.sdk.model.Issue">
         DELETE FROM sface_white_list WHERE people_id = #{peopleId} AND device_id = #{productCode}
     </delete>
-
+    <!--新增抓拍信息-->
     <insert id="insertCapture" parameterType="com.ss.sdk.model.Capture">
-        INSERT INTO sface_capture (people_id, device_id, opendoor_mode, result_code, capture_url, compare_date)
-        VALUES (#{peopleId}, #{deviceId}, #{opendoorMode}, #{resultCode}, #{captureUrl}, #{compareDate})
+        INSERT INTO sface_capture (people_id, device_id, opendoor_mode, result_code, capture_url, compare_date, recog_score, temp, temp_state)
+        VALUES (#{peopleId}, #{deviceId}, #{opendoorMode}, #{resultCode}, #{captureUrl}, #{compareDate}, #{recogScore}, #{temp}, #{tempState})
     </insert>
 
     <select id="findCommonCaptureList" resultType="com.ss.sdk.model.Capture">
@@ -66,7 +100,10 @@
             opendoor_mode AS opendoorMode,
             result_code AS resultCode,
             capture_url AS captureUrl,
-            compare_date AS compareDate
+            compare_date AS compareDate,
+            recog_score as recogScore,
+            temp AS temp,
+            temp_state AS tempState
         FROM sface_capture c
         LEFT JOIN sface_device d ON c.device_id = d.device_id
         LEFT JOIN sface_capture_time ct ON 1=1

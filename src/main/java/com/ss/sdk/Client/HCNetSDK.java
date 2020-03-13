@@ -1343,6 +1343,46 @@ public interface HCNetSDK extends Library {
         public byte reservedData2;
     }
 
+    //门禁主机报警信息结构体
+    public static class NET_DVR_ACS_ALARM_INFO extends Structure{
+        public int dwSize;
+        public int dwMajor;
+        public int dwMinor;
+        public NET_DVR_TIME struTime;
+        public byte[] sNetUser = new byte[MAX_NAMELEN];
+        public NET_DVR_IPADDR struRemoteHostAddr;
+        public NET_DVR_ACS_EVENT_INFO struAcsEventInfo;
+        public int dwPicDataLen;
+        public Pointer pPicData;
+        public byte[] byRes = new byte[24];
+    }
+
+    //门禁主机事件信息
+    public static class NET_DVR_ACS_EVENT_INFO extends Structure {
+        public int dwSize;
+        public byte[] byCardNo = new byte[32];
+        public byte byCardType;
+        public byte byWhiteListNo;
+        public byte byReportChannel;
+        public byte byCardReaderKind;
+        public int dwCardReaderNo;
+        public int dwDoorNo;
+        public int dwVerifyNo;
+        public int dwAlarmInNo;
+        public int dwAlarmOutNo;
+        public int dwCaseSensorNo;
+        public int dwRs485No;
+        public int dwMultiCardGroupNo;
+        public short wAccessChannel;
+        public byte byDeviceNo;
+        public byte byDistractControlNo;
+        public int dwEmployeeNo;
+        public short wLocalControllerID;
+        public byte byInternetAccess;
+        public byte byType;
+        public byte[] byRes = new byte[20];
+    }
+
     //码流压缩参数(子结构)(9000扩展)
     public static class NET_DVR_COMPRESSION_INFO_V30 extends Structure{
         public byte byStreamType;  //码流类型：0-视频流，1-复合流，0xfe- 自动（和源一致）

@@ -28,6 +28,8 @@ public class PropertiesUtil {
     private String webSocketUrlLL;
     private String userNameLL;
     private String passwordLL;
+    private String tempPictureUrl;
+    private Integer type;
 
     public PropertiesUtil() {
     }
@@ -134,5 +136,21 @@ public class PropertiesUtil {
 
     public void setPasswordLL(String passwordLL) {
         this.passwordLL = passwordLL;
+    }
+
+    public String getTempPictureUrl() {
+        return tempPictureUrl;
+    }
+
+    public void setTempPictureUrl(String tempPictureUrl) {
+        this.tempPictureUrl = tempPictureUrl;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 }

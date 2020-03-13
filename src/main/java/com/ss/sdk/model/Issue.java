@@ -9,7 +9,7 @@ package com.ss.sdk.model;
 public class Issue {
 
     private Integer id;
-    private Integer peopleId;
+    private String peopleId;
     private String productCode;
     private String peopleFacePath;
     private String issueTime;
@@ -17,6 +17,7 @@ public class Issue {
     private Integer taskType;
     private Integer issueStatus;
     private String errorMessage;
+    private String deviceId;
 
     public Integer getId() {
         return id;
@@ -26,11 +27,11 @@ public class Issue {
         this.id = id;
     }
 
-    public Integer getPeopleId() {
+    public String getPeopleId() {
         return peopleId;
     }
 
-    public void setPeopleId(Integer peopleId) {
+    public void setPeopleId(String peopleId) {
         this.peopleId = peopleId;
     }
 
@@ -88,5 +89,13 @@ public class Issue {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 }

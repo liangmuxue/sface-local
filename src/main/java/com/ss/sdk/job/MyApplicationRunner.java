@@ -6,7 +6,6 @@ import com.ss.sdk.Client.HCNetSDK;
 import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.model.Device;
 import com.ss.sdk.utils.JedisUtil;
-import com.ss.sdk.utils.JobProperties;
 import com.ss.sdk.utils.PropertiesUtil;
 import com.sun.jna.NativeLong;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,8 +51,17 @@ public class MyApplicationRunner implements ApplicationRunner {
             return;
         }
         logger.info("初始化sdk成功");
-        List<Device> deviceList = this.deviceMapper.findAllDevice();
-        alarm.StartAlarmListen(propertiesUtil.getIp(), Integer.parseInt(propertiesUtil.getPort()));
+        List<Device> deviceList = new ArrayList<>();
+        if (this.propertiesUtil.getType() == 0){
+            //查询所有海康门禁机
+            deviceList = this.deviceMapper.findHivAccessDevice();
+            //查询所有海康摄像机
+            deviceList.addAll(this.deviceMapper.findHivVideoDevice());
+        } else if(this.propertiesUtil.getType() == 1){
+            //查询所有海康设备
+            deviceList = this.deviceMapper.findAllHivDevice();
+        }
+        //alarm.StartAlarmListen(propertiesUtil.getIp(), Integer.parseInt(propertiesUtil.getPort()));
         for (Device device : deviceList) {
             NativeLong userId = basics.login(device.getIp(), device.getPort(), device.getUserName(), device.getPassword());
             if (userId.intValue() == -1) {
@@ -69,6 +78,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                 }
             }
         }
+        ContinueRead.connect();
     }
 
 }

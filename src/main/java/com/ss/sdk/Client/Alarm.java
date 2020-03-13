@@ -1,27 +1,32 @@
 package com.ss.sdk.Client;
 
+import com.ss.sdk.job.ContinueRead;
 import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.model.Capture;
+import com.ss.sdk.model.Device;
+import com.ss.sdk.socket.MyWebSocket;
 import com.ss.sdk.utils.ApplicationContextProvider;
+import com.ss.sdk.utils.Base64Util;
+import com.ss.sdk.utils.JedisUtil;
 import com.ss.sdk.utils.PropertiesUtil;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
+import javazoom.jl.player.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import javax.websocket.Session;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static com.ss.sdk.job.MyApplicationRunner.hCNetSDK;
 
@@ -39,6 +44,10 @@ public class Alarm {
     private PropertiesUtil propertiesUtil;
     @Resource
     private DeviceMapper deviceMapper;
+    @Resource
+    private CaptureJPEGPicture captureJPEGPicture;
+    @Resource
+    private JedisUtil jedisUtil;
     //报警布防句柄
     NativeLong lAlarmHandle;
     //报警监听句柄
@@ -145,7 +154,7 @@ public class Alarm {
                         //人员主键
                         String peopleId= new String(videoIntercomEvent.uEventInfo.struUnlockRecord.byControlSrc).replaceAll("\\p{C}", "");
                         if (peopleId != null && !"".equals(peopleId)){
-                            capture.setPeopleId(Integer.valueOf(new String(videoIntercomEvent.uEventInfo.struUnlockRecord.byControlSrc).replaceAll("\\p{C}", "")));
+                            capture.setPeopleId(new String(videoIntercomEvent.uEventInfo.struUnlockRecord.byControlSrc).replaceAll("\\p{C}", ""));
                         }
                         //设备编号
                         capture.setDeviceId(new String(new String(videoIntercomEvent.byDevNumber).replaceAll("\\p{C}", "")));
@@ -212,6 +221,75 @@ public class Alarm {
                         logger.info("认证类型:6");
                         break;
                 }
+            case 0x5002:
+                HCNetSDK.NET_DVR_ACS_ALARM_INFO strACSInfo = new HCNetSDK.NET_DVR_ACS_ALARM_INFO();
+                strACSInfo.write();
+                Pointer pACSInfo = strACSInfo.getPointer();
+                pACSInfo.write(0, pAlarmInfo.getByteArray(0, strACSInfo.size()), 0, strACSInfo.size());
+                strACSInfo.read();
+                int dwMajor = strACSInfo.dwMajor;
+                int dwMinor = strACSInfo.dwMinor;
+                if (dwMinor != 1032){
+                    return;
+                }
+                if (1 == dwMajor){
+                    String encodeToString = null;
+                    try {
+                        if (this.propertiesUtil.getType() == 0) {
+                            return;
+                        } else if(this.propertiesUtil.getType() == 1){
+                            List<Device> devices = this.deviceMapper.findHivVideoTempDevice();
+                            for (Device device : devices) {
+                                //启动抓拍并返回抓拍路径
+                                String pictureUrl = captureJPEGPicture.SetupAlarmChan((NativeLong) jedisUtil.get(device.getCplatDeviceId()));
+                                if (pictureUrl != null) {
+                                    encodeToString = Base64Util.localBase64(pictureUrl);
+                                }
+                                Capture capture = new Capture();
+                                capture.setDeviceId(device.getDeviceId());
+                                capture.setOpendoorMode(5);
+                                capture.setCaptureUrl(pictureUrl);
+                                capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
+                                capture.setTemp(ContinueRead.temp);
+                                if (ContinueRead.tempType == 0) {
+                                    double temp = 35.9;
+                                    if (ContinueRead.temp != 0) {
+                                        temp = ContinueRead.temp;
+                                    }
+                                    //发送体温正常信息
+                                    MyWebSocket.client.send("{'type':'tempNormal','temp':'" + temp + "','base64':'" + encodeToString + "'," + "'deviceId':'" + device.getCplatDeviceId()
+                                            + "','captureTime':'" + System.currentTimeMillis() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
+                                    capture.setTempState(1);
+                                } else if (ContinueRead.tempType == 1) {
+                                    //发送体温报警信息
+                                    MyWebSocket.client.send("{'type':'tempAlarm','temp':'" + ContinueRead.temp + "','base64':'" + encodeToString + "'," + "'deviceId':'" + device.getCplatDeviceId()
+                                            + "','captureTime':'" + System.currentTimeMillis() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
+                                    capture.setTempState(1);
+                                }
+                                //存储抓拍信息
+                                this.deviceMapper.insertCapture(capture);
+
+                            }
+                            //声明一个File对象
+                            File mp3 = new File("d:\\voice\\1.mp3");
+                            //创建一个输入流
+                            FileInputStream fileInputStream = new FileInputStream(mp3);
+                            //创建一个缓冲流
+                            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+                            //创建播放器对象，把文件的缓冲流传入进去
+                            Player player = new Player(bufferedInputStream);
+                            //调用播放方法进行播放
+                            player.play();
+                            logger.info("play success");
+                            Thread.sleep(1000);
+                            player.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
         }
+
     }
 }

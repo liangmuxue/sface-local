@@ -14,6 +14,16 @@ public interface DeviceMapper {
 
     List<Device> findAllDevice();
 
+    List<Device> findAllHivDevice();
+
+    List<Device> findHivAccessDevice();
+
+    List<Device> findHivHostDevice();
+
+    List<Device> findHivVideoDevice();
+
+    List<Device> findHivVideoTempDevice();
+
     Device findDevice(Issue issue);
 
     int updateDevice(List<Device> deviceList);

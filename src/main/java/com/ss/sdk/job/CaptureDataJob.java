@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 
 import java.io.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,27 +32,14 @@ public class CaptureDataJob implements SimpleJob {
 
     @Override
     public void execute(ShardingContext shardingContext) {
-
+        logger.info("定时任务CaptureDataJob已经启动" + new Date().toString());
         String maxCommonTime = this.deviceMapper.findCommonMaxTime();
         List<Capture> commonCaptureList = this.deviceMapper.findCommonCaptureList();
         if (commonCaptureList.size() > 0){
             for (Capture capture: commonCaptureList) {
-                InputStream in = null;
-                byte[] data = null;
                 if(capture.getCaptureUrl() != null && !"".equals(capture.getCaptureUrl())) {
-                    try {
-                        File dir = new File(capture.getCaptureUrl());
-                        if (dir.exists()) {
-                            in = new FileInputStream(capture.getCaptureUrl());
-                            data = new byte[in.available()];
-                            in.read(data);
-                            in.close();
-                            String encodeToString = Base64Utils.encodeToString(data);
-                            capture.setSpotImgPath(encodeToString);
-                        }
-                    } catch (Exception e) {
-                        logger.info("获取图片base64失败：" + e, e.toString());
-                    }
+                    String imageBase64 = Base64Util.localBase64(capture.getCaptureUrl());
+                    capture.setSpotImgPath(imageBase64);
                 }
             }
             Map<String, Object> parm = new HashMap<>();
@@ -72,22 +60,9 @@ public class CaptureDataJob implements SimpleJob {
         List<Capture> remoteCaptureList = this.deviceMapper.findRemoteCaptureList();
         if (remoteCaptureList.size() > 0){
             for (Capture capture: remoteCaptureList) {
-                InputStream in = null;
-                byte[] data = null;
                 if(capture.getCaptureUrl() != null && !"".equals(capture.getCaptureUrl())) {
-                    try {
-                        File dir = new File(capture.getCaptureUrl());
-                        if (dir.exists()) {
-                            in = new FileInputStream(capture.getCaptureUrl());
-                            data = new byte[in.available()];
-                            in.read(data);
-                            in.close();
-                            String encodeToString = Base64Utils.encodeToString(data);
-                            capture.setSpotImgPath(encodeToString);
-                        }
-                    } catch (Exception e) {
-                        logger.info("获取图片base64失败：" + e, e.toString());
-                    }
+                    String imageBase64 = Base64Util.localBase64(capture.getCaptureUrl());
+                    capture.setSpotImgPath(imageBase64);
                 }
             }
             Map<String, Object> parm = new HashMap<>();

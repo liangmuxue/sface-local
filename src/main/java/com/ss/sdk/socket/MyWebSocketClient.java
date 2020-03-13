@@ -35,6 +35,7 @@ public class MyWebSocketClient extends WebSocketClient {
     private DeviceMapper deviceMapper = ApplicationContextProvider.getBean(DeviceMapper.class);
     private Alarm alarm = ApplicationContextProvider.getBean(Alarm.class);
     private Basics basics = ApplicationContextProvider.getBean(Basics.class);
+    private MyWebSocketLL myWebSocketLL = ApplicationContextProvider.getBean(MyWebSocketLL.class);
 
     public MyWebSocketClient(URI serverUri, Draft protocolDraft) {
         super(serverUri, protocolDraft);
@@ -56,44 +57,53 @@ public class MyWebSocketClient extends WebSocketClient {
                 String deviceId = jsonObject.getString("deviceId");
                 String peopleId = jsonObject.getString("peopleId");
                 String captureUrl = jsonObject.getString("captureUrl");
+                Issue issue = new Issue();
+                issue.setProductCode(deviceId);
+                Device device = deviceMapper.findDevice(issue);
                 if ("opendoor".equals(command) && deviceId != null && !"".equals(deviceId)) {
-                    boolean isResult = remoteControl.controlGateWay((NativeLong)jedisUtil.get(deviceId));
-                    if (isResult){
-                        logger.info("远程开门成功");
-                    } else {
-                        logger.info("远程开门失败");
-                        Capture capture = new Capture();
-                        capture.setOpendoorMode(2);
-                        capture.setResultCode(0);
-                        MyWebSocketClient.this.deviceMapper.insertCapture(capture);
-                        int iErr = hCNetSDK.NET_DVR_GetLastError();
-                        logger.info("建立长连接失败，错误号：" + iErr);
-                        if(iErr == 47){
-                            Issue issue = new Issue();
-                            issue.setProductCode(deviceId);
-                            Device device = MyWebSocketClient.this.deviceMapper.findDevice(issue);
-                            NativeLong userId = MyWebSocketClient.this.basics.login(device.getIp(), device.getPort(), device.getUserName(), device.getPassword());
-                            if (userId.intValue() != -1) {
-                                MyWebSocketClient.this.jedisUtil.set(String.valueOf(device.getCplatDeviceId()), userId);
-                            }
-                            int alarmHandle = MyWebSocketClient.this.alarm.SetupAlarmChan(userId);
-                            if (alarmHandle == -1) {
-                                int error = hCNetSDK.NET_DVR_GetLastError();
-                                logger.info("设备" + device.getCplatDeviceId() + "布防失败，错误码：" + error);
-                            } else {
-                                logger.info("设备" + device.getCplatDeviceId() + "布防成功");
+                    if (device.getDeviceType() == 1){
+                        boolean isResult = remoteControl.controlGateWay((NativeLong)jedisUtil.get(deviceId));
+                        if (isResult){
+                            logger.info("远程开门成功");
+                        } else {
+                            logger.info("远程开门失败");
+                            Capture capture = new Capture();
+                            capture.setOpendoorMode(2);
+                            capture.setResultCode(0);
+                            MyWebSocketClient.this.deviceMapper.insertCapture(capture);
+                            int iErr = hCNetSDK.NET_DVR_GetLastError();
+                            logger.info("建立长连接失败，错误号：" + iErr);
+                            if(iErr == 47){
+                                NativeLong userId = MyWebSocketClient.this.basics.login(device.getIp(), device.getPort(), device.getUserName(), device.getPassword());
+                                if (userId.intValue() != -1) {
+                                    MyWebSocketClient.this.jedisUtil.set(String.valueOf(device.getCplatDeviceId()), userId);
+                                }
+                                int alarmHandle = MyWebSocketClient.this.alarm.SetupAlarmChan(userId);
+                                if (alarmHandle == -1) {
+                                    int error = hCNetSDK.NET_DVR_GetLastError();
+                                    logger.info("设备" + device.getCplatDeviceId() + "布防失败，错误码：" + error);
+                                } else {
+                                    logger.info("设备" + device.getCplatDeviceId() + "布防成功");
+                                }
                             }
                         }
+                    } else if (device.getDeviceType() == 3) {
+                        issue.setDeviceId(device.getDeviceId());
+                        myWebSocketLL.openDoor(issue);
                     }
                 }
-                if ("issue".equals(command) && deviceId != null && !"".equals(deviceId) && peopleId != null && !"".equals(peopleId) && captureUrl != null && !"".equals(captureUrl)) {
-                    Issue issue = new Issue();
-                    issue.setPeopleId(Integer.valueOf(peopleId));
-                    issue.setPeopleFacePath(captureUrl);
-                    issue.setTaskType(1);
-                    issue.setProductCode(deviceId);
-                    cardCfg.setCardInfo((NativeLong)jedisUtil.get(deviceId), issue);
-                    faceParamCfg.jBtnSetFaceCfg((NativeLong)jedisUtil.get(deviceId), issue);
+                if ("issue".equals(command) && deviceId != null && !"".equals(deviceId) && peopleId != null && !"".equals(peopleId) && captureUrl != null && !"".equals(captureUrl)) { ;
+                    if (device.getDeviceType() == 1) {
+                        issue.setPeopleId(peopleId);
+                        issue.setPeopleFacePath(captureUrl);
+                        issue.setTaskType(1);
+                        cardCfg.setCardInfo((NativeLong) jedisUtil.get(deviceId), issue);
+                        faceParamCfg.jBtnSetFaceCfg((NativeLong) jedisUtil.get(deviceId), issue);
+                    } else if (device.getDeviceType() == 3) {
+                        issue.setDeviceId(device.getDeviceId().substring(0, 4) + "0001");
+                        //新增住户
+                        myWebSocketLL.tenementAdd(issue);
+                    }
                 }
             }}) .start();
     }
@@ -128,7 +138,8 @@ public class MyWebSocketClient extends WebSocketClient {
             logger.info("connectBlocking: "+ f);
             if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 logger.info("成功链接云端服务器!");
-                client.send(propertiesUtil.getTenantId());
+                client.send("{'type':'register','tenantId':'" + propertiesUtil.getTenantId() + "'}");
+                MyWebSocket.client = client;
             }
         } catch (Exception e) {
             e.printStackTrace();

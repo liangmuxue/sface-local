@@ -9,7 +9,7 @@ package com.ss.sdk.model;
 public class Capture {
 
     private Integer id;
-    private Integer peopleId;
+    private String peopleId;
     private String deviceId;
     private Integer opendoorMode;
     private Integer resultCode;
@@ -17,6 +17,9 @@ public class Capture {
     private String compareDate;
     private String productCode;
     private String spotImgPath;
+    private Float recogScore;
+    private Double temp;
+    private Integer tempState;
 
     public Integer getId() {
         return id;
@@ -26,11 +29,11 @@ public class Capture {
         this.id = id;
     }
 
-    public Integer getPeopleId() {
+    public String getPeopleId() {
         return peopleId;
     }
 
-    public void setPeopleId(Integer peopleId) {
+    public void setPeopleId(String peopleId) {
         this.peopleId = peopleId;
     }
 
@@ -88,5 +91,29 @@ public class Capture {
 
     public void setSpotImgPath(String spotImgPath) {
         this.spotImgPath = spotImgPath;
+    }
+
+    public Float getRecogScore() {
+        return recogScore;
+    }
+
+    public void setRecogScore(Float recogScore) {
+        this.recogScore = recogScore;
+    }
+
+    public Double getTemp() {
+        return temp;
+    }
+
+    public void setTemp(Double temp) {
+        this.temp = temp;
+    }
+
+    public Integer getTempState() {
+        return tempState;
+    }
+
+    public void setTempState(Integer tempState) {
+        this.tempState = tempState;
     }
 }

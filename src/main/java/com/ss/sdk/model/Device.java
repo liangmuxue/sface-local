@@ -19,6 +19,9 @@ public class Device {
     private Integer isDelete;
     private String productCode;
     private Integer cameraState;
+    private Integer deviceType;
+    private Integer deviceTypeDetail;
+    private Integer deviceFunction;
 
     public Integer getId() {
         return id;
@@ -106,5 +109,29 @@ public class Device {
 
     public void setCameraState(Integer cameraState) {
         this.cameraState = cameraState;
+    }
+
+    public Integer getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Integer deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public Integer getDeviceTypeDetail() {
+        return deviceTypeDetail;
+    }
+
+    public void setDeviceTypeDetail(Integer deviceTypeDetail) {
+        this.deviceTypeDetail = deviceTypeDetail;
+    }
+
+    public Integer getDeviceFunction() {
+        return deviceFunction;
+    }
+
+    public void setDeviceFunction(Integer deviceFunction) {
+        this.deviceFunction = deviceFunction;
     }
 }

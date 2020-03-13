@@ -22,7 +22,6 @@ import static com.ss.sdk.job.MyApplicationRunner.hCNetSDK;
 
 /**
  * 卡参数管理
- *
  * @author 李爽超 chao
  * @create 2019/12/10
  * @email lishuangchao@ss-cas.com
@@ -103,7 +102,7 @@ public class CardCfg {
         struCardInfo.byLeaderCard = 0;
         struCardInfo.byDoorRight[0] = 1; //门1有权限
         struCardInfo.wCardRightPlan[0].wRightPlan[0] = 1; //门1关联卡参数计划模板1
-        struCardInfo.dwCardUserId = issue.getPeopleId();
+        struCardInfo.dwCardUserId = 1;
         struCardInfo.byCardModelType = 0;
         //卡有效期
         struCardInfo.struValid.byEnable = 1;
@@ -122,7 +121,7 @@ public class CardCfg {
         struCardInfo.dwMaxSwipeTime = 0; //无次数限制
         struCardInfo.dwSwipeTime = 0;
         struCardInfo.byCardPassword = "123456".getBytes();
-        struCardInfo.dwEmployeeNo = issue.getPeopleId();
+        struCardInfo.dwEmployeeNo = 1;
         struCardInfo.write();
         Pointer pSendBufSet = struCardInfo.getPointer();
         if (!hCNetSDK.NET_DVR_SendRemoteConfig(lHandle, 0x3, pSendBufSet, struCardInfo.size())) {

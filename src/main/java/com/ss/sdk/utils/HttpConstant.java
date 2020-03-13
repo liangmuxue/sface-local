@@ -17,4 +17,22 @@ public class HttpConstant {
 
     /*冠林*/
     public static String LL_LOGIN = "/login";
+
+    public static String LL_EVENT = "/event";
+
+    public static String LL_CARD_ADD = "/card/add";
+
+    public static String LL_TENEMENT_CLEAR = "/tenement/clear";
+
+    public static String LL_TENEMENT_MODIFY = "/tenement/modify";
+
+    public static String LL_TENEMENT_ADD = "/tenement/add";
+
+    public static String LL_TENEMENT_DELETE = "/tenement/delete";
+
+    public static String LL_TENEMENT_QUERY = "/tenement/query";
+
+    public static String LL_FACE_ADD = "/face/add";
+
+    public static String LL_OPEN_DOOR = "/ctrl/door_open";
 }

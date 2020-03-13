@@ -9,7 +9,7 @@ package com.ss.sdk.model;
 public class WhiteList {
 
     private Integer id;
-    private Integer peopleId;
+    private String peopleId;
     private String productCode;
 
     public Integer getId() {
@@ -20,11 +20,11 @@ public class WhiteList {
         this.id = id;
     }
 
-    public Integer getPeopleId() {
+    public String getPeopleId() {
         return peopleId;
     }
 
-    public void setPeopleId(Integer peopleId) {
+    public void setPeopleId(String peopleId) {
         this.peopleId = peopleId;
     }
 
