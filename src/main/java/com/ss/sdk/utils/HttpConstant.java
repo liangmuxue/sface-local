@@ -35,4 +35,19 @@ public class HttpConstant {
     public static String LL_FACE_ADD = "/face/add";
 
     public static String LL_OPEN_DOOR = "/ctrl/door_open";
+
+    //冠品设备
+    public static String GUANPIN_PERSON_CREATE = "/person/create";
+
+    public static String GUANPIN_PERSON_DELETE = "/person/delete";
+
+    public static String GUANPIN_FACE_CREATE = "/face/create";
+
+    public static String GUANPIN_PULL_SET_PERSION_PERMISSION_PARAMETER = "/pull/setPersonPermissionParameter";
+
+    public static String GUANPIN_PULL_SET_DATA_UPLOAD_PARAMETER = "/pull/setDataUploadParameter";
+
+    public static String GUANPIN_DEVICE_OPENDOOR_CONTROL = "/device/openDoorControl";
+
+    public static String GUANPIN_FACE_CAPTURE = "/face/capture";
 }

@@ -1,7 +1,5 @@
 package com.ss.sdk.socket;
 
-import com.ss.sdk.mapper.DeviceMapper;
-import com.ss.sdk.model.Capture;
 import com.ss.sdk.model.Issue;
 import com.ss.sdk.utils.AESUtil;
 import com.ss.sdk.utils.Base64Util;
@@ -16,8 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * WebSocketLL
@@ -69,7 +65,7 @@ public class MyWebSocketLL implements ApplicationRunner {
             MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.LL_TENEMENT_ADD + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issue);
             clientLL.connectBlocking();
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                String imageBase64 = Base64Util.ImageBase64(issue.getPeopleFacePath());
+                String imageBase64 = Base64Util.imagebase64(issue.getPeopleFacePath());
                 String text = "{'FrameNo':'" + issue.getDeviceId() + "','Name':'" + issue.getPeopleId() + "','Telephone':'','Telephone2':'','Gender':0,'CredentialType':'111','CredentialID':'" + issue.getPeopleId() + "','MemberType':'','NativePlace':'','Nationality':'','Nation':'','DegreeOfEdu':'','MaritalStatus':'','AddressCurrent':'','AddressPermanent':'','EmergencyContact':'','EmergencyContactTel':'','PersonnelStatus':'','PersonelFeature':'','WorkUnit':'','WorkUnitAddress':'','WorkUnitMaster':'','WorkUnitTel':'','RelationshipDesc':'','ThirdID':'','Remark':'','PersonKinds':'','PersonRoomRelation':'','FaceImage':'" + imageBase64 + "'}";
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
@@ -131,7 +127,7 @@ public class MyWebSocketLL implements ApplicationRunner {
             MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.LL_FACE_ADD + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issue);
             clientLL.connectBlocking();
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                String imageBase64 = Base64Util.ImageBase64(issue.getPeopleFacePath());
+                String imageBase64 = Base64Util.imagebase64(issue.getPeopleFacePath());
                 String text = "{'ID':'" + id + "','DeviceOrFrameNo':'','PhotoDesc':'','Photo':'data:image/jpeg;base64," + imageBase64 + "'}";
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));

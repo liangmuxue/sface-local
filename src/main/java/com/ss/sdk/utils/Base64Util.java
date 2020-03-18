@@ -9,9 +9,6 @@ import sun.misc.BASE64Encoder;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +23,12 @@ public class Base64Util {
     // 图片路劲层级分隔符
     private static String separator = "/";
 
-    public static String ImageBase64(String imgUrl) {
+    /**
+     * 远程地址图片转base64
+     * @param imgUrl
+     * @return
+     */
+    public static String imagebase64(String imgUrl) {
         URL url = null;
         InputStream is = null;
         ByteArrayOutputStream outStream = null;
@@ -73,6 +75,12 @@ public class Base64Util {
         return imgUrl;
     }
 
+    /**
+     * base64图片保存到本地
+     * @param baseImg
+     * @param path
+     * @throws Base64DecodingException
+     */
     public static void saveImg(String baseImg, String path) throws Base64DecodingException {
         //定义一个正则表达式的筛选规则，为了获取图片的类型
         String rgex = "data:image/(.*?);base64";
@@ -115,6 +123,11 @@ public class Base64Util {
         return "";
     }
 
+    /**
+     * 本地图片转base64
+     * @param url
+     * @return
+     */
     public static String localBase64(String url){
         InputStream in = null;
         byte[] data = null;

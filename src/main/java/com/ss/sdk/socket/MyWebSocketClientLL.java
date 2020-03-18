@@ -137,7 +137,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     String openMode = eventObject.getString("OpenMode");
                     String similarity = eventObject.getString("Similarity");
                     String credentialId = eventObject.getString("CredentialID");
-                    String imageBase64 = eventObject.getString("ImageBase64");
+                    String imageBase64 = eventObject.getString("imagebase64");
                     if("4".equals(openMode)){
                         //刷脸开门事件
                         Capture capture = new Capture();

@@ -8,7 +8,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -23,15 +25,21 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
-* cpalt HTTP请求
-* @author chao
-* @create 2019/12/12
-* @email lishuangchao@ss-cas.com
-**/
+ * cpalt HTTP请求
+ *
+ * @author chao
+ * @create 2019/12/12
+ * @email lishuangchao@ss-cas.com
+ **/
 @Component
 public class BaseHttpUtil {
 
@@ -42,11 +50,13 @@ public class BaseHttpUtil {
 
     public static final String APPLICATION_JSON = "application/json";
     public static final String CONTENT_CODE_UTF_8 = "UTF-8";
+    public static final String CONTENT_TYPE_FORM_URL = "application/x-www-form-urlencoded";
     public static String token = null;
     public static long tokenTime = 0L;
 
     /**
      * POST请求
+     *
      * @param parmJson
      * @param requestUrl
      * @return
@@ -106,5 +116,47 @@ public class BaseHttpUtil {
             return "Bearer " + tk.getString("token");
         }
         return null;
+    }
+
+    /**
+     * post请求
+     * @param httpUrl
+     * @param params
+     * @return
+     */
+    public String httpPostUrl(String httpUrl, List<NameValuePair> params) {
+        String result = null;
+        HttpClient client = HttpClients.createDefault();
+        HttpPost httpPost =   new HttpPost(httpUrl);
+        String s = "";
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(params,"UTF-8"));
+            httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
+            HttpResponse response = client.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if(statusCode==200){
+                HttpEntity entity = response.getEntity();
+                result = EntityUtils.toString(entity);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public boolean guanpinIsResult(String data){
+        String result = null;
+        String success = null;
+        JSONObject jsobj = null;
+        boolean isResult = false;
+        if (null != data) {
+            jsobj = JSONObject.parseObject(data);
+            result = jsobj.get("result").toString();
+            success = jsobj.get("success").toString();
+        }
+        if ("true".equals(success) && "1".equals(result)) {
+            isResult = true;
+        }
+        return isResult;
     }
 }

@@ -1,9 +1,6 @@
 package com.ss.sdk.mapper;
 
-import com.ss.sdk.model.Capture;
-import com.ss.sdk.model.Device;
-import com.ss.sdk.model.Issue;
-import com.ss.sdk.model.WhiteList;
+import com.ss.sdk.model.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -53,4 +50,6 @@ public interface DeviceMapper {
     int updateCommonTime(@Param("updateTime") String updateTime);
 
     int updateRemoteTime(@Param("updateTime") String updateTime);
+
+    int getPersonPermission(GuanpinRequest capture);
 }

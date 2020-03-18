@@ -14,13 +14,12 @@ import com.ss.sdk.model.WhiteList;
 import com.ss.sdk.socket.MyWebSocketLL;
 import com.ss.sdk.utils.*;
 import com.sun.jna.NativeLong;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 下发定时任务
@@ -83,6 +82,56 @@ public class GetIssueDataJob implements SimpleJob {
                         issue.setDeviceId(device.getDeviceId().substring(0, 4) + "0001");
                         //新增住户
                         myWebSocketLL.tenementAdd(issue);
+                    }
+                } else if (device.getDeviceType() == 4) {
+                    //冠品下发
+                    if(issue.getTaskType() == -1){
+                        List<NameValuePair> param = new ArrayList<NameValuePair>();
+                        NameValuePair pair1 = new BasicNameValuePair("pass", device.getPassword());
+                        NameValuePair pair2 = new BasicNameValuePair("id", issue.getPeopleId());
+                        param.add(pair1);
+                        param.add(pair2);
+                        String personResult = this.baseHttpUtil.httpPostUrl("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.GUANPIN_PERSON_DELETE, param);
+                        if (this.baseHttpUtil.guanpinIsResult(personResult)){
+                            this.deviceMapper.delWhiteList(issue);
+                            this.logger.info("冠品设备删除人员成功");
+                        }
+                    } else {
+                        List<NameValuePair> personList = new ArrayList<NameValuePair>();
+                        NameValuePair pair1 = new BasicNameValuePair("pass", device.getPassword());
+                        NameValuePair pair2 = new BasicNameValuePair("person", "{\"id\":\"" + issue.getPeopleId() + "\",\"idcardNum\":\"" + issue.getPeopleId() + "\",\"name\":\" \",\"departmentId\":0}");
+                        personList.add(pair1);
+                        personList.add(pair2);
+                        String personResult = this.baseHttpUtil.httpPostUrl("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.GUANPIN_PERSON_CREATE, personList);
+                        if (this.baseHttpUtil.guanpinIsResult(personResult)){
+                            //下发人脸
+                            List<NameValuePair> faceList = new ArrayList<NameValuePair>();
+                            NameValuePair pair3 = new BasicNameValuePair("pass", device.getPassword());
+                            NameValuePair pair4 = new BasicNameValuePair("personId", issue.getPeopleId());
+                            NameValuePair pair5 = new BasicNameValuePair("imgBase64", Base64Util.imagebase64(issue.getPeopleFacePath()));
+                            faceList.add(pair3);
+                            faceList.add(pair4);
+                            faceList.add(pair5);
+                            String faceResult = this.baseHttpUtil.httpPostUrl("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.GUANPIN_FACE_CREATE, faceList);
+                            if (this.baseHttpUtil.guanpinIsResult(faceResult)){
+                                issue.setIssueStatus(1);
+                                issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                                this.deviceMapper.insertIssue(issue);
+                                this.deviceMapper.insertWhiteList(issue);
+                                this.logger.info("冠品设备下发人员成功");
+                            } else {
+                                issue.setIssueStatus(2);
+                                issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                                issue.setErrorMessage("人脸接测失败");
+                                this.deviceMapper.insertIssue(issue);
+                                this.logger.info("冠品设备下发人员失败");
+                            }
+                        } else {
+                            issue.setIssueStatus(2);
+                            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                            issue.setErrorMessage("创建人员失败");
+                            this.deviceMapper.insertIssue(issue);
+                        }
                     }
                 }
             }

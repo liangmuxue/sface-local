@@ -4,7 +4,7 @@
 
     <!--查询所有设备-->
     <select id="findAllDevice" resultType="com.ss.sdk.model.Device">
-        SELECT cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
+        SELECT cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state, device_type AS deviceType FROM sface_device WHERE
         is_delete = 1
     </select>
     <!--查询所有海康设备-->
@@ -139,5 +139,12 @@
     <update id="updateRemoteTime" parameterType="java.lang.String">
         UPDATE sface_capture_time SET remote_time = #{updateTime}
     </update>
+
+    <select id="getPersonPermission" parameterType="com.ss.sdk.model.GuanpinRequest" resultType="java.lang.Integer">
+        SELECT count(*) FROM sface_capture WHERE
+        opendoor_mode = 1 AND people_id = #{idcardNum} AND device_id = #{deviceKey}
+        AND result_code = 1 AND temp_state = 0
+        <![CDATA[AND compare_date <= #{time}]]> <![CDATA[AND compare_date >= (#{time} - 2000)]]>
+    </select>
 
 </mapper>
