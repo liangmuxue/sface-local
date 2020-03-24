@@ -128,8 +128,9 @@ public class BaseHttpUtil {
         String result = null;
         HttpClient client = HttpClients.createDefault();
         HttpPost httpPost =   new HttpPost(httpUrl);
-        String s = "";
         try {
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(2000).setConnectTimeout(2000).build();
+            httpPost.setConfig(requestConfig);
             httpPost.setEntity(new UrlEncodedFormEntity(params,"UTF-8"));
             httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
             HttpResponse response = client.execute(httpPost);

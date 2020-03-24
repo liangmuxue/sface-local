@@ -1,6 +1,5 @@
 package com.ss.sdk.Client;
 
-import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.utils.PropertiesUtil;
 import com.sun.jna.NativeLong;
 import org.slf4j.Logger;

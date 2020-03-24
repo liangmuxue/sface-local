@@ -137,7 +137,11 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     String openMode = eventObject.getString("OpenMode");
                     String similarity = eventObject.getString("Similarity");
                     String credentialId = eventObject.getString("CredentialID");
-                    String imageBase64 = eventObject.getString("imagebase64");
+                    String imageBase64 = eventObject.getString("ImageBase64");
+                    String temp = null;
+                    if (eventObject.containsKey("Temperature")){
+                        temp = eventObject.getString("Temperature");
+                    }
                     if("4".equals(openMode)){
                         //刷脸开门事件
                         Capture capture = new Capture();
@@ -146,6 +150,14 @@ public class MyWebSocketClientLL extends WebSocketClient {
                         capture.setOpendoorMode(1);
                         capture.setResultCode(1);
                         capture.setRecogScore(Float.valueOf(similarity));
+                        if (temp != null){
+                            capture.setTemp(Double.valueOf(temp));
+                            if (capture.getTemp() > 37.5) {
+                                capture.setTempState(1);
+                            } else {
+                                capture.setTempState(0);
+                            }
+                        }
                         SimpleDateFormat sf = new SimpleDateFormat("yyyyMMddHHmmss");
                         String newName = sf.format(new Date());
                         String url = propertiesUtil.getCaptureUrl() + "/" + capture.getDeviceId() + "_" + newName + ".jpg";

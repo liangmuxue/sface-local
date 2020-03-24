@@ -40,6 +40,7 @@ public class GuanpinController {
                 guanpinResponse.setResult(1);
                 guanpinResponse.setStatus("200");
                 guanpinResponse.setSuccess(true);
+                guanpinResponse.setMsg("欢迎您");
             } else {
                 guanpinResponse.setResult(1);
                 guanpinResponse.setStatus("201");
