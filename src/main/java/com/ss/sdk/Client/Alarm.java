@@ -201,6 +201,7 @@ public class Alarm {
                         }
                         //认证时间
                         capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
+                        capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
                         int result = this.deviceMapper.insertCapture(capture);
                         if (result > 0){
                             logger.info("刷脸认证信息录入成功，设备编号：" + capture.getDeviceId());
@@ -229,65 +230,6 @@ public class Alarm {
                 strACSInfo.read();
                 int dwMajor = strACSInfo.dwMajor;
                 int dwMinor = strACSInfo.dwMinor;
-                if (dwMinor != 1032){
-                    return;
-                }
-                if (1 == dwMajor){
-                    String encodeToString = null;
-                    try {
-                        if (this.propertiesUtil.getType() == 0) {
-                            return;
-                        } else if(this.propertiesUtil.getType() == 1){
-                            List<Device> devices = this.deviceMapper.findHivVideoTempDevice();
-                            for (Device device : devices) {
-                                //启动抓拍并返回抓拍路径
-                                String pictureUrl = captureJPEGPicture.SetupAlarmChan((NativeLong) jedisUtil.get(device.getCplatDeviceId()));
-                                if (pictureUrl != null) {
-                                    encodeToString = Base64Util.localBase64(pictureUrl);
-                                }
-                                Capture capture = new Capture();
-                                capture.setDeviceId(device.getDeviceId());
-                                capture.setOpendoorMode(5);
-                                capture.setCaptureUrl(pictureUrl);
-                                capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
-                                capture.setTemp(ContinueRead.temp);
-                                if (ContinueRead.tempType == 0) {
-                                    double temp = 35.9;
-                                    if (ContinueRead.temp != 0) {
-                                        temp = ContinueRead.temp;
-                                    }
-                                    //发送体温正常信息
-                                    MyWebSocket.client.send("{'type':'tempNormal','temp':'" + temp + "','base64':'" + encodeToString + "'," + "'deviceId':'" + device.getCplatDeviceId()
-                                            + "','captureTime':'" + System.currentTimeMillis() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
-                                    capture.setTempState(1);
-                                } else if (ContinueRead.tempType == 1) {
-                                    //发送体温报警信息
-                                    MyWebSocket.client.send("{'type':'tempAlarm','temp':'" + ContinueRead.temp + "','base64':'" + encodeToString + "'," + "'deviceId':'" + device.getCplatDeviceId()
-                                            + "','captureTime':'" + System.currentTimeMillis() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
-                                    capture.setTempState(1);
-                                }
-                                //存储抓拍信息
-                                this.deviceMapper.insertCapture(capture);
-
-                            }
-                            //声明一个File对象
-                            File mp3 = new File("d:\\voice\\1.mp3");
-                            //创建一个输入流
-                            FileInputStream fileInputStream = new FileInputStream(mp3);
-                            //创建一个缓冲流
-                            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-                            //创建播放器对象，把文件的缓冲流传入进去
-                            Player player = new Player(bufferedInputStream);
-                            //调用播放方法进行播放
-                            player.play();
-                            logger.info("play success");
-                            Thread.sleep(1000);
-                            player.close();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
                 break;
         }
 

@@ -33,13 +33,21 @@ public class CaptureDataJob implements SimpleJob {
     @Override
     public void execute(ShardingContext shardingContext) {
         logger.info("定时任务CaptureDataJob已经启动" + new Date().toString());
-        String maxCommonTime = this.deviceMapper.findCommonMaxTime();
-        List<Capture> commonCaptureList = this.deviceMapper.findCommonCaptureList();
+        List<Capture> commonCaptureList = this.deviceMapper.findCommonCaptureList(new Capture());
+        long maxCommonTime = 0;
+        //String maxCommonTime = this.deviceMapper.findCommonMaxTime();
         if (commonCaptureList.size() > 0){
             for (Capture capture: commonCaptureList) {
+                if (Long.parseLong(capture.getCreateTime()) > maxCommonTime) {
+                    maxCommonTime = Long.parseLong(capture.getCreateTime());
+                }
                 if(capture.getCaptureUrl() != null && !"".equals(capture.getCaptureUrl())) {
                     String imageBase64 = Base64Util.localBase64(capture.getCaptureUrl());
                     capture.setSpotImgPath(imageBase64);
+                }
+                if(capture.getCaptureFullUrl() != null && !"".equals(capture.getCaptureFullUrl())) {
+                    String imageBase64 = Base64Util.localBase64(capture.getCaptureFullUrl());
+                    capture.setPanoramaPath(imageBase64);
                 }
             }
             Map<String, Object> parm = new HashMap<>();
@@ -53,13 +61,19 @@ public class CaptureDataJob implements SimpleJob {
                 code = faceJson.get("code").toString();
             }
             if ("00000000".equals(code)) {
-                this.deviceMapper.updateCommonTime(maxCommonTime);
+                if (maxCommonTime != 0) {
+                    this.deviceMapper.updateCommonTime(String.valueOf(maxCommonTime));
+                }
             }
         }
-        String maxRemoteTime = this.deviceMapper.findRemoteMaxTime();
         List<Capture> remoteCaptureList = this.deviceMapper.findRemoteCaptureList();
+        //String maxRemoteTime = this.deviceMapper.findRemoteMaxTime();
+        long maxRemoteTime = 0;
         if (remoteCaptureList.size() > 0){
             for (Capture capture: remoteCaptureList) {
+                if (Long.parseLong(capture.getCreateTime()) > maxRemoteTime) {
+                    maxRemoteTime = Long.parseLong(capture.getCreateTime());
+                }
                 if(capture.getCaptureUrl() != null && !"".equals(capture.getCaptureUrl())) {
                     String imageBase64 = Base64Util.localBase64(capture.getCaptureUrl());
                     capture.setSpotImgPath(imageBase64);
@@ -76,7 +90,9 @@ public class CaptureDataJob implements SimpleJob {
                 code = faceJson.get("code").toString();
             }
             if ("00000000".equals(code)) {
-                this.deviceMapper.updateRemoteTime(maxRemoteTime);
+                if (maxRemoteTime != 0){
+                    this.deviceMapper.updateRemoteTime(String.valueOf(maxRemoteTime));
+                }
             }
         }
     }

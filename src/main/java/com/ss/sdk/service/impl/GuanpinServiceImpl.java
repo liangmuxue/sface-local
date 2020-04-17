@@ -1,10 +1,13 @@
 package com.ss.sdk.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.ss.sdk.job.ContinueRead;
 import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.model.Capture;
+import com.ss.sdk.model.Device;
 import com.ss.sdk.model.GuanpinRequest;
 import com.ss.sdk.service.IGuanpinService;
+import com.ss.sdk.socket.MyWebSocket;
 import com.ss.sdk.utils.Base64Util;
 import com.ss.sdk.utils.JedisUtil;
 import com.ss.sdk.utils.PropertiesUtil;
@@ -45,7 +48,6 @@ public class GuanpinServiceImpl implements IGuanpinService {
         String bodyTemp = null;
         JSONObject jsobj = null;
         if (null != guanpinRequest.getExtra()) {
-            //下发人员
             jsobj = JSONObject.parseObject(guanpinRequest.getExtra());
             if(jsobj != null){
                 bodyTemp = jsobj.get("bodyTemp").toString();
@@ -74,7 +76,18 @@ public class GuanpinServiceImpl implements IGuanpinService {
         capture.setCaptureUrl(url);
         capture.setCompareDate(guanpinRequest.getTime());
         capture.setOpendoorMode(1);
+        capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
         int result = this.deviceMapper.insertCapture(capture);
+        Device d = new Device();
+        d.setDeviceId(capture.getDeviceId());
+        Device device = this.deviceMapper.findDevice(d);
+        if (capture.getTempState() != null && capture.getTempState() == 1) {
+            MyWebSocket.client.send("{'type':'tempAlarm','peopleId':'" + capture.getPeopleId() + "','temp':'" + capture.getTemp() + "','base64':'" + guanpinRequest.getImgBase64() + "'," + "'deviceId':'" + device.getCplatDeviceId()
+                    + "','captureTime':'" + capture.getCompareDate() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
+        } else {
+            MyWebSocket.client.send("{'type':'normal','peopleId':'" + capture.getPeopleId() + "','temp':'" + capture.getTemp() + "','base64':'" + guanpinRequest.getImgBase64() + "'," + "'deviceId':'" + device.getCplatDeviceId()
+                    + "','captureTime':'" + capture.getCompareDate() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
+        }
         return result;
     }
 

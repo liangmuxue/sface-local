@@ -35,12 +35,12 @@ public class GuanpinController {
     public GuanpinResponse getPersonPermission(GuanpinRequest para) throws Exception {
         GuanpinResponse guanpinResponse = new GuanpinResponse();
         try {
+            this.logger.info("冠品人员权限验证开始");
             int personPermission = this.guanpinService.getPersonPermission(para);
             if (personPermission > 0){
                 guanpinResponse.setResult(1);
                 guanpinResponse.setStatus("200");
                 guanpinResponse.setSuccess(true);
-                guanpinResponse.setMsg("欢迎您");
             } else {
                 guanpinResponse.setResult(1);
                 guanpinResponse.setStatus("201");

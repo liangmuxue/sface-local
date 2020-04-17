@@ -51,12 +51,12 @@ public class AESUtil {
      */
     public static String encrypt(String sSrc, String sKey, String cKey) throws Exception {
         if (sKey == null) {
-            System.out.print("Key为空null");
+            //System.out.print("Key为空null");
             return null;
         }
         // 判断Key是否为16位
         if (sKey.length() != 32) {
-            System.out.print("Key长度不是16位");
+            //System.out.print("Key长度不是16位");
             return null;
         }
         byte[] raw = sKey.getBytes("utf-8");
@@ -80,12 +80,12 @@ public class AESUtil {
         try {
             // 判断Key是否正确
             if (sKey == null) {
-                System.out.print("Key为空null");
+                //System.out.print("Key为空null");
                 return null;
             }
             // 判断Key是否为16位
             if (sKey.length() != 32) {
-                System.out.print("Key长度不是16位");
+                //System.out.print("Key长度不是16位");
                 return null;
             }
             byte[] raw = sKey.getBytes("utf-8");
@@ -99,11 +99,11 @@ public class AESUtil {
                 String originalString = new String(original);
                 return originalString;
             } catch (Exception e) {
-                System.out.println(e.toString());
+                //System.out.println(e.toString());
                 return null;
             }
         } catch (Exception ex) {
-            System.out.println(ex.toString());
+            //System.out.println(ex.toString());
             return null;
         }
     }

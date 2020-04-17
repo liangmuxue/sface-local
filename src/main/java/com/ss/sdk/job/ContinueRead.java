@@ -188,60 +188,6 @@ public class ContinueRead extends Thread implements SerialPortEventListener { //
                     String encodeToString = null;
                     long data = getData(vos);
                     double temp = (double) data / 10;
-                    if (this.propertiesUtil.getType() == 0) {
-                        List<Device> devices = this.deviceMapper.findHivVideoTempDevice();
-                        for (Device device : devices) {
-                            //启动抓拍并返回抓拍路径
-                            String pictureUrl = captureJPEGPicture.SetupAlarmChan((NativeLong) jedisUtil.get(device.getCplatDeviceId()));
-                            if (pictureUrl != null) {
-                                encodeToString = Base64Util.localBase64(pictureUrl);
-                            }
-                            Capture capture = new Capture();
-                            capture.setDeviceId(device.getDeviceId());
-                            capture.setOpendoorMode(5);
-                            capture.setCaptureUrl(pictureUrl);
-                            capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
-                            capture.setTemp(temp);
-                            if ("F5".equals(vos[0])) {
-                                //发送体温报警信息
-                                MyWebSocket.client.send("{'type':'tempAlarm','temp':'" + temp + "','base64':'" + encodeToString + "'," + "'deviceId':'" + device.getCplatDeviceId()
-                                        + "','captureTime':'" + System.currentTimeMillis() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
-                                capture.setTempState(1);
-                            } else if ("F7".equals(vos[0])) {
-                                //发送正常体温信息
-                                MyWebSocket.client.send("{'type':'tempNormal','temp':'" + temp + "','base64':'" + encodeToString + "'," + "'deviceId':'" + device.getCplatDeviceId()
-                                        + "','captureTime':'" + System.currentTimeMillis() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
-                                capture.setTempState(0);
-                            }
-                            //存储抓拍信息
-                            this.deviceMapper.insertCapture(capture);
-
-                        }
-                    } else if (this.propertiesUtil.getType() == 1){
-                        if ("F7".equals(vos[0])){
-                            ContinueRead.temp =temp;
-                            ContinueRead.tempType = 0;
-                            long time = System.currentTimeMillis();
-                            ContinueRead.time = time;
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ContinueRead.reset(time);
-                                }
-                            }).start();
-                        } else if ("F5".equals(vos[0])){
-                            ContinueRead.temp =temp;
-                            ContinueRead.tempType = 1;
-                            long time = System.currentTimeMillis();
-                            ContinueRead.time = time;
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ContinueRead.reset(time);
-                                }
-                            }).start();
-                        }
-                    }
                 }
             }
         } catch (Exception e) {

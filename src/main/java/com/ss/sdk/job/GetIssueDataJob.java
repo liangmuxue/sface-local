@@ -60,11 +60,13 @@ public class GetIssueDataJob implements SimpleJob {
             List<Issue> issues = JSONObject.parseArray(data.toJSONString(), Issue.class);
             for (Issue issue : issues) {
                 //查找设备
-                Device device = this.deviceMapper.findDevice(issue);
+                Device d = new Device();
+                d.setProductCode(issue.getProductCode());
+                Device device = this.deviceMapper.findDevice(d);
                 if(device == null){
                     continue;
                 }
-                if (device.getDeviceType() == 1) {
+                if (device.getDeviceType() == 1 && device.getDeviceTypeDetail() != null && device.getDeviceTypeDetail() == 101) {
                     //海康设备
                     //下发卡
                     cardCfg.setCardInfo((NativeLong) jedisUtil.get(String.valueOf(issue.getProductCode())), issue);
@@ -114,17 +116,37 @@ public class GetIssueDataJob implements SimpleJob {
                             faceList.add(pair5);
                             String faceResult = this.baseHttpUtil.httpPostUrl("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.GUANPIN_FACE_CREATE, faceList);
                             if (this.baseHttpUtil.guanpinIsResult(faceResult)){
+                                List<NameValuePair> permission = new ArrayList<NameValuePair>();
+                                NameValuePair pair6 = new BasicNameValuePair("pass", device.getPassword());
+                                NameValuePair pair7 = new BasicNameValuePair("personId", issue.getPeopleId());
+                                NameValuePair pair8 = new BasicNameValuePair("time", "2028-01-01 12:00:00");
+                                permission.add(pair6);
+                                permission.add(pair7);
+                                permission.add(pair8);
+                                String permissionResult = this.baseHttpUtil.httpPostUrl("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.GUANPIN_PERSON_PERMISSION_CREATE, permission);
+                                if (this.baseHttpUtil.guanpinIsResult(permissionResult)){
+                                    this.logger.info("冠品设备添加人员权限成功:" + permissionResult);
+                                }
+                                List<NameValuePair> passTime = new ArrayList<NameValuePair>();
+                                NameValuePair pair9 = new BasicNameValuePair("pass", device.getPassword());
+                                NameValuePair pair10 = new BasicNameValuePair("passtime", "{\"personId\":\"" + issue.getPeopleId() + "\",\"passtime\":\"00:00:00,23:59:59\"}");
+                                passTime.add(pair9);
+                                passTime.add(pair10);
+                                String passTimeResult = this.baseHttpUtil.httpPostUrl("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.GUANPIN_PERSON_CREATE_PASSTIME, passTime);
+                                if (this.baseHttpUtil.guanpinIsResult(passTimeResult)){
+                                    this.logger.info("冠品设备添加时间权限成功:" + permissionResult);
+                                }
                                 issue.setIssueStatus(1);
                                 issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
                                 this.deviceMapper.insertIssue(issue);
                                 this.deviceMapper.insertWhiteList(issue);
-                                this.logger.info("冠品设备下发人员成功");
+                                this.logger.info("冠品设备下发人员成功:" + faceResult);
                             } else {
                                 issue.setIssueStatus(2);
                                 issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
                                 issue.setErrorMessage("人脸接测失败");
                                 this.deviceMapper.insertIssue(issue);
-                                this.logger.info("冠品设备下发人员失败");
+                                this.logger.info("冠品设备下发人员失败:" + faceResult);
                             }
                         } else {
                             issue.setIssueStatus(2);

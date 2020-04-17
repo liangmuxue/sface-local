@@ -57,19 +57,7 @@ public class MyApplicationRunner implements ApplicationRunner {
             return;
         }
         logger.info("初始化sdk成功");
-        List<Device> deviceList = new ArrayList<>();
-        if (this.propertiesUtil.getType() == 0) {
-            deviceList = this.deviceMapper.findAllDevice();
-            ContinueRead.connect();
-            //查询所有海康门禁机
-            //deviceList = this.deviceMapper.findHivAccessDevice();
-            //查询所有海康摄像机
-            //deviceList.addAll(this.deviceMapper.findHivVideoDevice());
-        } else if (this.propertiesUtil.getType() == 1) {
-            //查询所有海康设备
-            deviceList = this.deviceMapper.findAllHivDevice();
-            ContinueRead.connect();
-        }
+        List<Device> deviceList = this.deviceMapper.findAllDevice();
         for (Device device : deviceList) {
             if (device.getDeviceType() == 1) {
                 NativeLong userId = basics.login(device.getIp(), device.getPort(), device.getUserName(), device.getPassword());
@@ -78,18 +66,20 @@ public class MyApplicationRunner implements ApplicationRunner {
                     logger.info("设备" + device.getCplatDeviceId() + "注册失败，错误码：" + error);
                 } else {
                     jedisUtil.set(String.valueOf(device.getCplatDeviceId()), userId);
-                    int alarmHandle = alarm.SetupAlarmChan(userId);
-                    if (alarmHandle == -1) {
-                        int error = hCNetSDK.NET_DVR_GetLastError();
-                        logger.info("设备" + device.getCplatDeviceId() + "布防失败，错误码：" + error);
-                    } else {
-                        logger.info("设备" + device.getCplatDeviceId() + "布防成功");
+                    if (device.getDeviceTypeDetail() == 501){
+                        int alarmHandle = alarm.SetupAlarmChan(userId);
+                        if (alarmHandle == -1) {
+                            int error = hCNetSDK.NET_DVR_GetLastError();
+                            logger.info("设备" + device.getCplatDeviceId() + "布防失败，错误码：" + error);
+                        } else {
+                            logger.info("设备" + device.getCplatDeviceId() + "布防成功");
+                        }
                     }
                 }
             } else if (device.getDeviceType() == 4) {
                 List<NameValuePair> param1 = new ArrayList<NameValuePair>();
                 NameValuePair pair1 = new BasicNameValuePair("pass", device.getPassword());
-                NameValuePair pair2 = new BasicNameValuePair("callbackPermissionUrl", "http://" + this.propertiesUtil.getIp() + ":" + this.propertiesUtil.getPort() + "/sface/guanpinPush/getPersonPermission");
+                NameValuePair pair2 = new BasicNameValuePair("callbackPermissionUrl", "");
                 NameValuePair pair3 = new BasicNameValuePair("timeout", "10000");
                 param1.add(pair1);
                 param1.add(pair2);

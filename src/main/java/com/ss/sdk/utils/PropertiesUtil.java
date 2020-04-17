@@ -29,7 +29,6 @@ public class PropertiesUtil {
     private String userNameLL;
     private String passwordLL;
     private String tempPictureUrl;
-    private Integer type;
 
     public PropertiesUtil() {
     }
@@ -146,11 +145,4 @@ public class PropertiesUtil {
         this.tempPictureUrl = tempPictureUrl;
     }
 
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
-    }
 }

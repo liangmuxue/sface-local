@@ -11,17 +11,9 @@ public interface DeviceMapper {
 
     List<Device> findAllDevice();
 
-    List<Device> findAllHivDevice();
-
-    List<Device> findHivAccessDevice();
-
-    List<Device> findHivHostDevice();
-
-    List<Device> findHivVideoDevice();
-
     List<Device> findHivVideoTempDevice();
 
-    Device findDevice(Issue issue);
+    Device findDevice(Device device);
 
     int updateDevice(List<Device> deviceList);
 
@@ -39,7 +31,11 @@ public interface DeviceMapper {
 
     int insertCapture(Capture capture);
 
-    List<Capture> findCommonCaptureList();
+    int updateCapture(Capture capture);
+
+    List<Capture> findCommonCaptureList(Capture capture);
+
+    List<Capture> findCloudwalk(Capture capture);
 
     List<Capture> findRemoteCaptureList();
 

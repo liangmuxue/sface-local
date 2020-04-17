@@ -14,12 +14,15 @@ public class Capture {
     private Integer opendoorMode;
     private Integer resultCode;
     private String captureUrl;
+    private String captureFullUrl;
     private String compareDate;
     private String productCode;
     private String spotImgPath;
+    private String panoramaPath;
     private Float recogScore;
     private Double temp;
     private Integer tempState;
+    private String createTime;
 
     public Integer getId() {
         return id;
@@ -69,6 +72,14 @@ public class Capture {
         this.captureUrl = captureUrl;
     }
 
+    public String getCaptureFullUrl() {
+        return captureFullUrl;
+    }
+
+    public void setCaptureFullUrl(String captureFullUrl) {
+        this.captureFullUrl = captureFullUrl;
+    }
+
     public String getCompareDate() {
         return compareDate;
     }
@@ -93,6 +104,14 @@ public class Capture {
         this.spotImgPath = spotImgPath;
     }
 
+    public String getPanoramaPath() {
+        return panoramaPath;
+    }
+
+    public void setPanoramaPath(String panoramaPath) {
+        this.panoramaPath = panoramaPath;
+    }
+
     public Float getRecogScore() {
         return recogScore;
     }
@@ -115,5 +134,13 @@ public class Capture {
 
     public void setTempState(Integer tempState) {
         this.tempState = tempState;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 }

@@ -64,7 +64,9 @@ public class MyWebSocketClient extends WebSocketClient {
                 String captureUrl = jsonObject.getString("captureUrl");
                 Issue issue = new Issue();
                 issue.setProductCode(deviceId);
-                Device device = deviceMapper.findDevice(issue);
+                Device d = new Device();
+                d.setProductCode(issue.getProductCode());
+                Device device = deviceMapper.findDevice(d);
                 if ("opendoor".equals(command) && deviceId != null && !"".equals(deviceId)) {
                     if (device.getDeviceType() == 1) {
                         boolean isResult = remoteControl.controlGateWay((NativeLong) jedisUtil.get(deviceId));
@@ -75,6 +77,7 @@ public class MyWebSocketClient extends WebSocketClient {
                             Capture capture = new Capture();
                             capture.setOpendoorMode(2);
                             capture.setResultCode(0);
+                            capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
                             MyWebSocketClient.this.deviceMapper.insertCapture(capture);
                             int iErr = hCNetSDK.NET_DVR_GetLastError();
                             logger.info("建立长连接失败，错误号：" + iErr);
@@ -134,6 +137,7 @@ public class MyWebSocketClient extends WebSocketClient {
 //                        }
                         capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
                         capture.setOpendoorMode(2);
+                        capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
                         //保存远程开门信息
                         deviceMapper.insertCapture(capture);
                     }

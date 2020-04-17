@@ -4,46 +4,38 @@
 
     <!--查询所有设备-->
     <select id="findAllDevice" resultType="com.ss.sdk.model.Device">
-        SELECT cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state, device_type AS deviceType FROM sface_device WHERE
+        SELECT cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state, device_type AS deviceType, device_type_detail AS deviceTypeDetail FROM sface_device WHERE
         is_delete = 1
     </select>
-    <!--查询所有海康设备-->
-    <select id="findAllHivDevice" resultType="com.ss.sdk.model.Device">
-        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
-        is_delete = 1 AND device_type = 1
-    </select>
 
-    <!--查询海康门禁机设备-->
-    <select id="findHivAccessDevice" resultType="com.ss.sdk.model.Device">
-        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
-        is_delete = 1 AND device_type = 1 AND device_type_detail = 101
-    </select>
-
-    <!--查询海康门禁主机设备-->
-    <select id="findHivHostDevice" resultType="com.ss.sdk.model.Device">
-        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
-        is_delete = 1 AND device_type = 1 AND device_type_detail = 102
-    </select>
-
-    <!--查询海康摄像机设备-->
-    <select id="findHivVideoDevice" resultType="com.ss.sdk.model.Device">
-        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
-        is_delete = 1 AND device_type = 1 AND device_type_detail = 103
-    </select>
-
-    <!--查询海康摄像机体温检测设备-->
-    <select id="findHivVideoTempDevice" resultType="com.ss.sdk.model.Device">
-        SELECT device_id AS deviceId, cplat_device_id AS cplatDeviceId, ip, port, user_name AS userName, password, state FROM sface_device WHERE
-        is_delete = 1 AND device_type = 1 AND device_type_detail = 103 AND device_function = 2
-    </select>
-
-    <select id="findDevice" parameterType="com.ss.sdk.model.Issue" resultType="com.ss.sdk.model.Device">
+    <!--条件查询设备-->
+    <select id="findDevice" resultType="com.ss.sdk.model.Device" parameterType="com.ss.sdk.model.Device">
         SELECT
-        cplat_device_id AS cplatDeviceId, device_id AS deviceId, ip, port, user_name AS userName, password, state, device_type AS deviceType, device_function AS deviceFunction
-        FROM
-        sface_device
-        WHERE
-        is_delete = 1 AND cplat_device_id = #{productCode}
+        device_id AS deviceId,
+        cplat_device_id AS cplatDeviceId,
+        ip,
+        port,
+        user_name AS userName,
+        password,
+        state,
+        device_type AS deviceType,
+        device_type_detail AS deviceTypeDetail
+        FROM sface_device
+        <where>
+            is_delete = 1
+            <if test="deviceType !=null">
+                and device_type =#{deviceType}
+            </if>
+            <if test="deviceTypeDetail !=null">
+                and device_type_detail =#{deviceTypeDetail}
+            </if>
+            <if test="productCode !=null and productCode !=''">
+                and cplat_device_id =#{productCode}
+            </if>
+            <if test="deviceId !=null and deviceId !=''">
+                and device_id =#{deviceId}
+            </if>
+        </where>
     </select>
 
     <update id="updateDevice" parameterType="java.util.List">
@@ -89,25 +81,64 @@
     </delete>
     <!--新增抓拍信息-->
     <insert id="insertCapture" parameterType="com.ss.sdk.model.Capture">
-        INSERT INTO sface_capture (people_id, device_id, opendoor_mode, result_code, capture_url, compare_date, recog_score, temp, temp_state)
-        VALUES (#{peopleId}, #{deviceId}, #{opendoorMode}, #{resultCode}, #{captureUrl}, #{compareDate}, #{recogScore}, #{temp}, #{tempState})
+        INSERT INTO sface_capture (people_id, device_id, opendoor_mode, result_code, capture_url, capture_full_url, compare_date, recog_score, temp, temp_state, create_time)
+        VALUES (#{peopleId}, #{deviceId}, #{opendoorMode}, #{resultCode}, #{captureUrl}, #{captureFullUrl}, #{compareDate}, #{recogScore}, #{temp}, #{tempState}, #{createTime})
     </insert>
 
-    <select id="findCommonCaptureList" resultType="com.ss.sdk.model.Capture">
+    <!--修改抓拍照信息-->
+    <update id="updateCapture" parameterType="com.ss.sdk.model.Capture">
+        update sface_capture
+        <set>
+            <if test="captureUrl != null">
+                capture_url = #{captureUrl},
+            </if>
+            <if test="captureFullUrl != null">
+                capture_full_url = #{captureFullUrl},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="findCommonCaptureList" resultType="com.ss.sdk.model.Capture" parameterType="com.ss.sdk.model.Capture">
         SELECT
             c.people_id AS peopleId,
             d.cplat_device_id AS productCode,
             opendoor_mode AS opendoorMode,
             result_code AS resultCode,
             capture_url AS captureUrl,
+            capture_full_url AS captureFullUrl,
             compare_date AS compareDate,
             recog_score as recogScore,
             temp AS temp,
-            temp_state AS tempState
+            temp_state AS tempState,
+            create_time AS createTime
         FROM sface_capture c
         LEFT JOIN sface_device d ON c.device_id = d.device_id
         LEFT JOIN sface_capture_time ct ON 1=1
-        WHERE  <![CDATA[c.compare_date > ct.common_time]]> AND c.opendoor_mode != 2
+        <where>
+            <![CDATA[c.create_time > ct.common_time]]> AND c.opendoor_mode != 2
+        </where>
+    </select>
+
+    <!--查找云从设备抓拍记录-->
+    <select id="findCloudwalk" resultType="com.ss.sdk.model.Capture" parameterType="com.ss.sdk.model.Capture">
+        SELECT
+        id
+        FROM sface_capture
+        <where>
+            opendoor_mode = -1
+            <if test="captureUrl !=null and captureUrl !=''">
+                and capture_url is null
+                and capture_full_url is not null
+            </if>
+            <if test="captureFullUrl !=null and captureFullUrl !=''">
+                and capture_full_url is null
+                and capture_url is not null
+            </if>
+            and <![CDATA[compare_date + 1000 > #{compareDate}]]>
+            and <![CDATA[compare_date - 1000 < #{compareDate}]]>
+            and device_id = #{deviceId}
+        </where>
     </select>
 
     <select id="findRemoteCaptureList" resultType="com.ss.sdk.model.Capture">
@@ -117,19 +148,21 @@
         opendoor_mode AS opendoorMode,
         result_code AS resultCode,
         capture_url AS captureUrl,
-        compare_date AS compareDate
+        capture_full_url AS captureFullUrl,
+        compare_date AS compareDate,
+        create_time AS createTime
         FROM sface_capture c
         LEFT JOIN sface_device d ON c.device_id = d.device_id
         LEFT JOIN sface_capture_time ct ON 1=1
-        WHERE  <![CDATA[c.compare_date > ct.remote_time]]> AND c.opendoor_mode = 2
+        WHERE  <![CDATA[c.create_time > ct.remote_time]]> AND c.opendoor_mode = 2
     </select>
 
     <select id="findCommonMaxTime" resultType="java.lang.String">
-        SELECT MAX(compare_date) FROM sface_capture WHERE opendoor_mode != 2
+        SELECT MAX(create_time) FROM sface_capture WHERE opendoor_mode != 2
     </select>
 
     <select id="findRemoteMaxTime" resultType="java.lang.String">
-        SELECT MAX(compare_date) FROM sface_capture WHERE opendoor_mode = 2
+        SELECT MAX(create_time) FROM sface_capture WHERE opendoor_mode = 2
     </select>
 
     <update id="updateCommonTime" parameterType="java.lang.String">

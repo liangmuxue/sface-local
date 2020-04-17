@@ -50,4 +50,8 @@ public class HttpConstant {
     public static String GUANPIN_DEVICE_OPENDOOR_CONTROL = "/device/openDoorControl";
 
     public static String GUANPIN_FACE_CAPTURE = "/face/capture";
+
+    public static String GUANPIN_PERSON_PERMISSION_CREATE = "/person/permissionsCreate";
+
+    public static String GUANPIN_PERSON_CREATE_PASSTIME = "/person/createPasstime";
 }

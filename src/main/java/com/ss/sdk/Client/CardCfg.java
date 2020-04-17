@@ -68,7 +68,9 @@ public class CardCfg {
             iErr = hCNetSDK.NET_DVR_GetLastError();
             logger.info("建立长连接失败，错误号：" + iErr);
             if (iErr == 47) {
-                Device device = this.deviceMapper.findDevice(issue);
+                Device d = new Device();
+                d.setProductCode(issue.getProductCode());
+                Device device = this.deviceMapper.findDevice(d);
                 NativeLong userId = basics.login(device.getIp(), device.getPort(), device.getUserName(), device.getPassword());
                 if (userId.intValue() != -1) {
                     jedisUtil.set(String.valueOf(device.getCplatDeviceId()), userId);

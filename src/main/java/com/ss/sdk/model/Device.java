@@ -21,7 +21,6 @@ public class Device {
     private Integer cameraState;
     private Integer deviceType;
     private Integer deviceTypeDetail;
-    private Integer deviceFunction;
 
     public Integer getId() {
         return id;
@@ -125,13 +124,5 @@ public class Device {
 
     public void setDeviceTypeDetail(Integer deviceTypeDetail) {
         this.deviceTypeDetail = deviceTypeDetail;
-    }
-
-    public Integer getDeviceFunction() {
-        return deviceFunction;
-    }
-
-    public void setDeviceFunction(Integer deviceFunction) {
-        this.deviceFunction = deviceFunction;
     }
 }

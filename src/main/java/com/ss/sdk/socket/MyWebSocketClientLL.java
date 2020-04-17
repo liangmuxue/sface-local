@@ -2,8 +2,10 @@ package com.ss.sdk.socket;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.ss.sdk.job.ContinueRead;
 import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.model.Capture;
+import com.ss.sdk.model.Device;
 import com.ss.sdk.model.Issue;
 import com.ss.sdk.utils.*;
 import org.apache.logging.log4j.LogManager;
@@ -164,9 +166,20 @@ public class MyWebSocketClientLL extends WebSocketClient {
                         Base64Util.saveImg(imageBase64, url);
                         capture.setCaptureUrl(url);
                         capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
+                        capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
                         int result = this.deviceMapper.insertCapture(capture);
                         if (result > 0){
                             logger.info("刷脸认证信息录入成功，设备编号：" + capture.getDeviceId());
+                            Device d = new Device();
+                            d.setDeviceId(capture.getDeviceId());
+                            Device device = this.deviceMapper.findDevice(d);
+                            if (capture.getTempState() != null && capture.getTempState() == 1) {
+                                MyWebSocket.client.send("{'type':'tempAlarm','peopleId':'" + capture.getPeopleId() + "','temp':'" + temp + "','base64':'" + imageBase64 + "'," + "'deviceId':'" + device.getCplatDeviceId()
+                                        + "','captureTime':'" + capture.getCompareDate() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
+                            } else {
+                                MyWebSocket.client.send("{'type':'normal','peopleId':'" + capture.getPeopleId() + "','temp':'" + temp + "','base64':'" + imageBase64 + "'," + "'deviceId':'" + device.getCplatDeviceId()
+                                        + "','captureTime':'" + capture.getCompareDate() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
+                            }
                         } else {
                             logger.info("刷脸认证信息录入失败，设备编号：" + capture.getDeviceId());
                         }
@@ -183,6 +196,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     capture.setOpendoorMode(2);
                     capture.setResultCode(1);
                     capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
+                    capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
                     int result = this.deviceMapper.insertCapture(capture);
                     if (result > 0){
                         logger.info("远程开门信息录入成功，设备编号：" + capture.getDeviceId());
@@ -214,14 +228,26 @@ public class MyWebSocketClientLL extends WebSocketClient {
     @Override
     public void onClose(int arg0, String arg1, boolean arg2) {
         logger.info("客户端已关闭!");
-        if (uri.contains(HttpConstant.LL_EVENT)){
-            try {
-                Thread.sleep(30000);
-                this.myWebSocketLL.event();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        if (uri.contains(HttpConstant.LL_EVENT)) {
+            logger.info("开始尝试重新连接冠林服务器...");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(10 * 1000);
+                        reConnect();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
         }
+    }
+
+    private void reConnect() throws Exception {
+        this.myWebSocketLL.login();
+        Thread.sleep(2000);
+        this.myWebSocketLL.event();
     }
 
     /**

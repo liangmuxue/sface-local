@@ -84,7 +84,7 @@ public class Base64Util {
     public static void saveImg(String baseImg, String path) throws Base64DecodingException {
         //定义一个正则表达式的筛选规则，为了获取图片的类型
         String rgex = "data:image/(.*?);base64";
-        String type = getSubUtilSimple(baseImg, rgex);
+        //String type = getSubUtilSimple(baseImg, rgex);
         //去除base64图片的前缀
         baseImg = baseImg.replaceFirst("data:(.+?);base64,", "");
         byte[] b;
