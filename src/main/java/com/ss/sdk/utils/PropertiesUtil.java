@@ -29,6 +29,7 @@ public class PropertiesUtil {
     private String userNameLL;
     private String passwordLL;
     private String tempPictureUrl;
+    private String multiengine_cplatHttp;
 
     public PropertiesUtil() {
     }
@@ -145,4 +146,11 @@ public class PropertiesUtil {
         this.tempPictureUrl = tempPictureUrl;
     }
 
+    public String getMultiengine_cplatHttp() {
+        return multiengine_cplatHttp;
+    }
+
+    public void setMultiengine_cplatHttp(String multiengine_cplatHttp) {
+        this.multiengine_cplatHttp = multiengine_cplatHttp;
+    }
 }
