@@ -234,7 +234,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(10 * 1000);
+                        Thread.sleep(1 * 1000);
                         reConnect();
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -46,8 +46,10 @@ public class CloudwalkServiceImpl implements ICloudwalkService {
             Device d = new Device();
             d.setDeviceId(capture.getDeviceId());
             Device device = this.deviceMapper.findDevice(d);
-            MyWebSocket.client.send("{'type':'normal','base64':'" + cloudwalkCapture.getSpotImgPath() + "'," + "'deviceId':'" + device.getCplatDeviceId()
-                    + "','captureTime':'" + capture.getCompareDate() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
+            if (MyWebSocket.client != null) {
+                MyWebSocket.client.send("{'type':'normal','base64':'" + cloudwalkCapture.getSpotImgPath() + "'," + "'deviceId':'" + device.getCplatDeviceId()
+                        + "','captureTime':'" + capture.getCompareDate() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
+            }
         } else if (cloudwalkCapture.getPanoramaPath() != null) {
 
             String url = this.propertiesUtil.getCaptureUrl() + "/" + capture.getDeviceId() + "_" + newName + "_full.jpg";

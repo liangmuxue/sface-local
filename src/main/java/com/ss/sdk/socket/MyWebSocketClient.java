@@ -169,32 +169,27 @@ public class MyWebSocketClient extends WebSocketClient {
     @Override
     public void onClose(int arg0, String arg1, boolean arg2) {
         logger.info("客户端已关闭!");
-        logger.info("开始尝试重新连接...");
+        reConnect();
+    }
+
+    private void reConnect() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(10 * 1000);
-                } catch (InterruptedException e) {
+                    logger.info("开始尝试重新连接...");
+                    MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
+                    boolean f = client.connectBlocking();
+                    logger.info("connectBlocking: " + f);
+                    if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+                        logger.info("成功链接云端服务器!");
+                        client.send("{'type':'register','tenantId':'" + propertiesUtil.getTenantId() + "'}");
+                        MyWebSocket.client = client;
+                    }
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                reConnect();
             }
-        }).start();
-    }
-
-    private void reConnect() {
-        try {
-            MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
-            boolean f = client.connectBlocking();
-            logger.info("connectBlocking: " + f);
-            if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                logger.info("成功链接云端服务器!");
-                client.send("{'type':'register','tenantId':'" + propertiesUtil.getTenantId() + "'}");
-                MyWebSocket.client = client;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        }).run();
     }
 }

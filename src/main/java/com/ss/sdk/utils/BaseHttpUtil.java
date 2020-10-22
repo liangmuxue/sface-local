@@ -74,7 +74,7 @@ public class BaseHttpUtil {
             // 通过HttpPost来发送post请求
             HttpPost httpPost = new HttpPost(requestUrl);
             // 设置超时时间
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(5000).setConnectTimeout(5000).build();
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
             httpPost.setConfig(requestConfig);
             httpPost.setEntity(new StringEntity(parmJson, ContentType.APPLICATION_JSON));
             httpPost.addHeader("Content-Type", APPLICATION_JSON);

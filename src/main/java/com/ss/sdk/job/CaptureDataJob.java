@@ -53,18 +53,8 @@ public class CaptureDataJob implements SimpleJob {
             Map<String, Object> parm = new HashMap<>();
             parm.put("captureList", commonCaptureList);
             String json = JSON.toJSONString(parm);
-            String resultString = baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.UPLOAD_COMMON_CAPTURE_LIST);
-            String code = null;
-            JSONObject faceJson = null;
-            if (null != resultString) {
-                faceJson = JSONObject.parseObject(resultString);
-                code = faceJson.get("code").toString();
-            }
-            if ("00000000".equals(code)) {
-                if (maxCommonTime != 0) {
-                    this.deviceMapper.updateCommonTime(String.valueOf(maxCommonTime));
-                }
-            }
+            baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.UPLOAD_COMMON_CAPTURE_LIST);
+            this.deviceMapper.updateCommonTime(String.valueOf(maxCommonTime));
         }
         List<Capture> remoteCaptureList = this.deviceMapper.findRemoteCaptureList();
         //String maxRemoteTime = this.deviceMapper.findRemoteMaxTime();
@@ -82,18 +72,8 @@ public class CaptureDataJob implements SimpleJob {
             Map<String, Object> parm = new HashMap<>();
             parm.put("captureList", remoteCaptureList);
             String json = JSON.toJSONString(parm);
-            String resultString = baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.UPLOAD_REMOTE_CAPTURE_LIST);
-            String code = null;
-            JSONObject faceJson = null;
-            if (null != resultString) {
-                faceJson = JSONObject.parseObject(resultString);
-                code = faceJson.get("code").toString();
-            }
-            if ("00000000".equals(code)) {
-                if (maxRemoteTime != 0){
-                    this.deviceMapper.updateRemoteTime(String.valueOf(maxRemoteTime));
-                }
-            }
+            baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.UPLOAD_REMOTE_CAPTURE_LIST);
+            this.deviceMapper.updateRemoteTime(String.valueOf(maxRemoteTime));
         }
     }
 }

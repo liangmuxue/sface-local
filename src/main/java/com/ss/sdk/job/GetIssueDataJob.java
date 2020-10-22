@@ -41,14 +41,14 @@ public class GetIssueDataJob implements SimpleJob {
     @Override
     public void execute(ShardingContext shardingContext) {
 
-        logger.info("定时任务GetIssueDataJob已经启动" + new Date().toString());
+        this.logger.info("定时任务GetIssueDataJob已经启动" + new Date().toString());
         //查询白名单
         List<WhiteList> whiteList = this.deviceMapper.findWhiteList();
         Map<String, Object> parm = new HashMap<>();
         parm.put("whiteList", whiteList);
         String json = JSON.toJSONString(parm);
         //请求云端下发接口
-        String faceResultString = baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.FACE_LIST);
+        String faceResultString = this.baseHttpUtil.httpPost(json, this.propertiesUtil.getCplatHttp() + HttpConstant.FACE_LIST);
         String faceCode = null;
         JSONObject faceJson = null;
         if (null != faceResultString) {
@@ -79,11 +79,11 @@ public class GetIssueDataJob implements SimpleJob {
                     if (issue.getTaskType() == -1){
                         issue.setDeviceId(device.getDeviceId().substring(0, 4) + "0001");
                         //删除住户
-                        myWebSocketLL.tenementQuery(issue);
+                       this.myWebSocketLL.tenementQuery(issue);
                     } else {
                         issue.setDeviceId(device.getDeviceId().substring(0, 4) + "0001");
                         //新增住户
-                        myWebSocketLL.tenementAdd(issue);
+                        this.myWebSocketLL.tenementAdd(issue);
                     }
                 } else if (device.getDeviceType() == 4) {
                     //冠品下发
@@ -111,6 +111,7 @@ public class GetIssueDataJob implements SimpleJob {
                             NameValuePair pair3 = new BasicNameValuePair("pass", device.getPassword());
                             NameValuePair pair4 = new BasicNameValuePair("personId", issue.getPeopleId());
                             NameValuePair pair5 = new BasicNameValuePair("imgBase64", Base64Util.imagebase64(issue.getPeopleFacePath()));
+                            logger.info("base64:" + issue.getPeopleFacePath());
                             faceList.add(pair3);
                             faceList.add(pair4);
                             faceList.add(pair5);

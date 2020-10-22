@@ -65,16 +65,8 @@ public class IpJob implements SimpleJob {
             Map<String, Object> parm = new HashMap<>();
             parm.put("deviceList", devices);
             String json = JSON.toJSONString(parm);
-            String resultString = baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.DEVICE_STATE);
-            String code = null;
-            JSONObject deviceJson = null;
-            if (null != resultString) {
-                deviceJson = JSONObject.parseObject(resultString);
-                code = deviceJson.get("code").toString();
-            }
-            if (null != deviceJson && "00000000".equals(code)) {
-                IpJob.this.deviceMapper.updateDevice(devices);
-            }
+            baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.DEVICE_STATE);
+            IpJob.this.deviceMapper.updateDevice(devices);
         }
     }
 }
