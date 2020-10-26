@@ -54,7 +54,9 @@ public class CaptureDataJob implements SimpleJob {
             parm.put("captureList", commonCaptureList);
             String json = JSON.toJSONString(parm);
             baseHttpUtil.httpPost(json, propertiesUtil.getCplatHttp() + HttpConstant.UPLOAD_COMMON_CAPTURE_LIST);
-            baseHttpUtil.httpPost(json, propertiesUtil.getMultiengine_cplatHttp() + HttpConstant.UPLOAD_COMMON_CAPTURE_LIST);
+            logger.info("启动:发送请求到服务器163："+propertiesUtil.getMultiengine_cplatHttp());
+            String s = baseHttpUtil.httpPostServer(json, propertiesUtil.getMultiengine_cplatHttp() + HttpConstant.UPLOAD_COMMON_CAPTURE_LIST);
+            logger.info("完成:发送请求到服务器163："+s);
             this.deviceMapper.updateCommonTime(String.valueOf(maxCommonTime));
         }
         List<Capture> remoteCaptureList = this.deviceMapper.findRemoteCaptureList();

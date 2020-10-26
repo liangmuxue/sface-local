@@ -119,6 +119,70 @@ public class BaseHttpUtil {
     }
 
     /**
+     * POST请求163服务器
+     *
+     * @param parmJson
+     * @param requestUrl
+     * @return
+     */
+    public String httpPostServer(String parmJson, String requestUrl) {
+        String result = null;
+        try {
+            if (!requestUrl.equals(propertiesUtil.getMultiengine_cplatHttp() + HttpConstant.TOKEN)) {
+                if (System.currentTimeMillis() > tokenTime) {
+                    serverLogin();
+                }
+            }
+            // 获取默认的请求客户端
+            CloseableHttpClient httpClient = HttpClients.createDefault();
+            // 通过HttpPost来发送post请求
+            HttpPost httpPost = new HttpPost(requestUrl);
+            // 设置超时时间
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
+            httpPost.setConfig(requestConfig);
+            httpPost.setEntity(new StringEntity(parmJson, ContentType.APPLICATION_JSON));
+            httpPost.addHeader("Content-Type", APPLICATION_JSON);
+            httpPost.addHeader("X-Authorization", token);
+            httpPost.addHeader("Tenant-Id", propertiesUtil.getTenantId());
+            HttpResponse response = httpClient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                result = EntityUtils.toString(entity, CONTENT_CODE_UTF_8);
+            }
+            httpClient.close();
+            if (StringUtils.isBlank(result)) {
+                LOG.info("cplat接口请求失败:" + requestUrl);
+            }
+        } catch (Exception e) {
+            LOG.error("cplat POST请求异常" + e.toString(), e);
+        }
+        return result;
+    }
+
+    public String serverLogin() {
+        Map<String, Object> parm = new HashMap<>();
+        parm.put("username", propertiesUtil.getMultiengine_userName());
+        parm.put("password", propertiesUtil.getMultiengine_password());
+        // 发起鉴权请求并获取请求结果
+        Object jsonObject = JSONObject.toJSON(parm);
+        String resultString = httpPostServer(jsonObject.toString(), propertiesUtil.getMultiengine_cplatHttp() + HttpConstant.TOKEN);
+        String code = null;
+        JSONObject jsobj = null;
+        if (null != resultString) {
+            jsobj = JSONObject.parseObject(resultString);
+            code = jsobj.get("code").toString();
+        }
+        // 获取token并设置token超时时间
+        if (null != jsobj && "00000000".equals(code)) {
+            JSONObject tk = (JSONObject) jsobj.get("data");
+            token = "Bearer " + tk.getString("token");
+            tokenTime = System.currentTimeMillis() + 1500000L;
+            return "Bearer " + tk.getString("token");
+        }
+        return null;
+    }
+
+    /**
      * post请求
      * @param httpUrl
      * @param params
