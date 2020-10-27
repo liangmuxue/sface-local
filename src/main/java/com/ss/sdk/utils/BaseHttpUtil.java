@@ -53,6 +53,7 @@ public class BaseHttpUtil {
     public static final String CONTENT_TYPE_FORM_URL = "application/x-www-form-urlencoded";
     public static String token = null;
     public static long tokenTime = 0L;
+    public static long tokenTime1 = 0L;
 
     /**
      * POST请求
@@ -126,15 +127,22 @@ public class BaseHttpUtil {
      * @return
      */
     public String httpPostServer(String parmJson, String requestUrl) {
+        LOG.info("接口参数parmJson:" + parmJson);
+        LOG.info("接口参数requestUrl:" + requestUrl);
         String result = null;
         try {
+            LOG.info("requestUrl对比参数:" + (propertiesUtil.getMultiengine_cplatHttp() + HttpConstant.TOKEN));
             if (!requestUrl.equals(propertiesUtil.getMultiengine_cplatHttp() + HttpConstant.TOKEN)) {
-                if (System.currentTimeMillis() > tokenTime) {
+                LOG.info("System.currentTimeMillis():" + System.currentTimeMillis());
+                LOG.info("tokenTime:" + tokenTime1);
+                if (System.currentTimeMillis() > tokenTime1) {
                     serverLogin();
+                    LOG.info("接口请求serverLogin():" + serverLogin());
                 }
             }
             // 获取默认的请求客户端
             CloseableHttpClient httpClient = HttpClients.createDefault();
+            LOG.info("获取默认的请求客户端:" + httpClient);
             // 通过HttpPost来发送post请求
             HttpPost httpPost = new HttpPost(requestUrl);
             // 设置超时时间
@@ -145,6 +153,7 @@ public class BaseHttpUtil {
             httpPost.addHeader("X-Authorization", token);
             httpPost.addHeader("Tenant-Id", propertiesUtil.getTenantId());
             HttpResponse response = httpClient.execute(httpPost);
+            LOG.info("通过HttpPost来发送post请求:" + response);
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 result = EntityUtils.toString(entity, CONTENT_CODE_UTF_8);
@@ -156,6 +165,7 @@ public class BaseHttpUtil {
         } catch (Exception e) {
             LOG.error("cplat POST请求异常" + e.toString(), e);
         }
+        LOG.info("接口请求http:" + result);
         return result;
     }
 
@@ -166,17 +176,19 @@ public class BaseHttpUtil {
         // 发起鉴权请求并获取请求结果
         Object jsonObject = JSONObject.toJSON(parm);
         String resultString = httpPostServer(jsonObject.toString(), propertiesUtil.getMultiengine_cplatHttp() + HttpConstant.TOKEN);
+        LOG.info("接口请求resultString:" + resultString);
         String code = null;
         JSONObject jsobj = null;
         if (null != resultString) {
             jsobj = JSONObject.parseObject(resultString);
+            LOG.info("接口请求jsobj:" + jsobj);
             code = jsobj.get("code").toString();
         }
         // 获取token并设置token超时时间
         if (null != jsobj && "00000000".equals(code)) {
             JSONObject tk = (JSONObject) jsobj.get("data");
             token = "Bearer " + tk.getString("token");
-            tokenTime = System.currentTimeMillis() + 1500000L;
+            tokenTime1 = System.currentTimeMillis() + 1500000L;
             return "Bearer " + tk.getString("token");
         }
         return null;
