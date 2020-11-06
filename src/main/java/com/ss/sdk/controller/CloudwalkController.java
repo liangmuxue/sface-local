@@ -31,7 +31,7 @@ public class CloudwalkController {
 
     @RequestMapping(value = {"/terminal/uploadSnapRecord"}, method = {RequestMethod.POST})
     public int uploadSnapRecord(HttpServletRequest request, @RequestBody CloudwalkCapture cloudwalkCapture, BindingResult bindingResult) throws Exception {
-        logger.info("terminal/uploadSnapRecord方法，设备入例参数"+cloudwalkCapture);
+        logger.info("terminal/uploadSnapRecord方法，设备入例参数"+cloudwalkCapture.toString());
         int resultCode = 0;
         try {
             resultCode = this.cloudwalkService.insertCapture(cloudwalkCapture);
@@ -44,7 +44,7 @@ public class CloudwalkController {
 
     @RequestMapping(value = {"/terminal/uploadSnapPanorama"}, method = {RequestMethod.POST})
     public int uploadSnapPanorama(HttpServletRequest request, @RequestBody CloudwalkCapture cloudwalkCapture, BindingResult bindingResult) throws Exception {
-        logger.info("terminal/uploadSnapPanorama方法，设备入例参数"+cloudwalkCapture);
+        logger.info("terminal/uploadSnapPanorama方法，设备入例参数"+cloudwalkCapture.toString());
         int resultCode = 0;
         try {
             resultCode = this.cloudwalkService.insertCapture(cloudwalkCapture);

@@ -63,7 +63,7 @@ public class GuanpinController {
      */
     @RequestMapping(value = {"/dataUpload"}, method = {RequestMethod.POST})
     public GuanpinResponse dataUpload(GuanpinRequest para) throws Exception {
-        logger.info("冠品抓拍信息录入方法，设备入例参数"+para);
+        logger.info("冠品抓拍信息录入方法，设备入例参数"+para.toString());
         GuanpinResponse guanpinResponse = new GuanpinResponse();
         try {
             int result = this.guanpinService.dataUpload(para);
