@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ss.sdk.mapper.PersonDataMapper">
+
+    <select id="checkPerson" resultType="com.ss.sdk.pojo.terminal.model.PersonData"
+            parameterType="com.ss.sdk.pojo.terminal.model.PersonData">
+        select
+        *
+        from ss_person
+        where
+        person_name = #{personName}
+        and
+        date_format(from_unixtime(start_time),'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')
+        limit 0, 1
+    </select>
+
+    <insert id="insertPerson" parameterType="com.ss.sdk.pojo.terminal.model.PersonData" keyProperty="id">
+        insert into ss_person (
+        person_name,
+        start_time,
+        start_temp,
+        org_id,
+        device_id
+        )
+        values (
+        #{personName},
+        #{time},
+        #{temp},
+        1,
+        1
+        )
+    </insert>
+
+    <update id="updatePerson" parameterType="com.ss.sdk.pojo.terminal.model.PersonData">
+        update ss_person
+        <set>
+            end_time = #{time},
+            end_temp = #{temp},
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="personPage" parameterType="com.ss.sdk.pojo.terminal.model.PersonData" resultType="com.ss.sdk.pojo.terminal.model.PersonData">
+        select
+        p.id,
+        p.person_name as personName,
+        p.start_time as startTime,
+        p.end_time as endTime,
+        p.start_temp as startTemp,
+        p.end_temp as endTemp,
+        o.org_name as orgName,
+        o.org_address as addressName,
+        d.device_name as deviceName
+        from
+        ss_person p
+        left join ss_org o on p.org_id = o.id
+        left join ss_device d on p.device_id = d.id
+        <where>
+            <if test="personName !=null and personName !=''">
+                and p.person_name LIKE CONCAT('%', #{personName}, '%')
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                <![CDATA[AND p.start_time >= #{startTime}]]>
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                <![CDATA[AND p.end_time <= #{endTime}]]>
+            </if>
+        </where>
+        order by p.start_time desc
+    </select>
+
+    <select id="personList" parameterType="com.ss.sdk.pojo.terminal.model.PersonData" resultType="com.ss.sdk.pojo.terminal.model.PersonInfo">
+        select
+        @rownum :=@rownum + 1 AS id,
+        p.person_name as personName,
+        FROM_UNIXTIME(p.start_time) as startTime,
+        FROM_UNIXTIME(p.end_time) as endTime,
+        p.start_temp as startTemp,
+        p.end_temp as endTemp
+        from
+        (SELECT @rownum := 0) r,
+        ss_person p
+        <where>
+            <if test="personName !=null and personName !=''">
+                and p.person_name LIKE CONCAT('%', #{personName}, '%')
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                <![CDATA[AND p.start_time >= #{startTime}]]>
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                <![CDATA[AND p.end_time <= #{endTime}]]>
+            </if>
+        </where>
+    </select>
+
+    <!--插入抓拍表-->
+    <insert id="insertSfaceCapture" parameterType="com.ss.sdk.pojo.terminal.model.SfaceCapture">
+        insert into sface_capture(
+            people_id,
+            device_id,
+            opendoor_mode,
+            result_code,
+            capture_url,
+            capture_full_url,
+            compare_date,
+            temp,
+            temp_state,
+            create_time)
+        values(
+            #{peopleId},
+            #{deviceId},
+            #{opendoorMode},
+            #{resultCode},
+            #{captureUrl},
+            #{captureFullUrl},
+            #{compareDate},
+            #{temp},
+            #{tempState},
+            #{createTime}
+        )
+    </insert>
+</mapper>

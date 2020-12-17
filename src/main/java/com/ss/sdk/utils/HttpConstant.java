@@ -54,4 +54,8 @@ public class HttpConstant {
     public static String GUANPIN_PERSON_PERMISSION_CREATE = "/person/permissionsCreate";
 
     public static String GUANPIN_PERSON_CREATE_PASSTIME = "/person/createPasstime";
+
+    public static String YUSHI_INSERT_PEOPLE = "/LAPI/V1.0/PeopleLibraries/3/People";
+
+    public static String YUSHI_REMOTE_DOOR = "/LAPI/V1.0/PACS/Controller/RemoteOpened";
 }

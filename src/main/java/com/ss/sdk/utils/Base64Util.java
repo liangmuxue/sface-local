@@ -146,4 +146,35 @@ public class Base64Util {
         }
         return imgBase64;
     }
+
+    /**
+     *通过图片base64流判断图片等于多少字节
+     *image 图片流
+     */
+    public static Integer imageSize(String image){
+        // 1.需要计算文件流大小，首先把头部的data:image/png;base64,（注意有逗号）去掉。
+       /* String str=image.substring(22);
+        //2.找到等号，把等号也去掉
+        Integer equalIndex= str.indexOf("=");
+        if(str.indexOf("=")>0) {
+            str=str.substring(0, equalIndex);
+        }*/
+        //3.原来的字符流大小，单位为字节
+        Integer strLength=image.length();
+        //4.计算后得到的文件流大小，单位为字节
+        Integer size=strLength-(strLength/8)*2;
+        return size;
+    }
+
+    public static int getLength(String str) {
+        if (str == null || str.length() == 0) {
+            return 0;
+        }
+        try {
+            return str.getBytes("UTF-8").length;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

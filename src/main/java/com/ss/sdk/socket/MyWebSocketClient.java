@@ -141,6 +141,29 @@ public class MyWebSocketClient extends WebSocketClient {
                         //保存远程开门信息
                         deviceMapper.insertCapture(capture);
                     }
+                    else if(device.getDeviceType() == 6){
+                        //宇视远程开门
+                        Capture capture = new Capture();
+                        String result = baseHttpUtil.doPut( "http://" + device.getIp() + ":" + device.getPort() + HttpConstant.YUSHI_REMOTE_DOOR, null,"{}");
+                        if(null != result){
+                            JSONObject resultJson = JSONObject.parseObject(result);
+                            JSONObject res = (JSONObject)resultJson.get("Response");
+                            String responseStr = res.get("ResponseString").toString();
+                            if("Succeed".equals(responseStr)){
+                                capture.setResultCode(1);
+                                logger.info("宇视设备" + "远程开门成功");
+                            }else{
+                                capture.setResultCode(0);
+                                logger.info("宇视设备" + "远程开门失败");
+                            }
+                            capture.setDeviceId(device.getDeviceId());
+                            capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
+                            capture.setOpendoorMode(2);
+                            capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
+                            //保存远程开门信息
+                            deviceMapper.insertCapture(capture);
+                        }
+                    }
                 }
                 if ("issue".equals(command) && deviceId != null && !"".equals(deviceId) && peopleId != null && !"".equals(peopleId) && captureUrl != null && !"".equals(captureUrl)) {
                     ;

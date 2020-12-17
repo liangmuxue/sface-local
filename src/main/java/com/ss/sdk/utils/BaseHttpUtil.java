@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -159,5 +160,58 @@ public class BaseHttpUtil {
             isResult = true;
         }
         return isResult;
+    }
+
+    /**
+     * 原生字符串发送put请求
+     *
+     * @param url
+     * @param token
+     * @param jsonStr
+     * @return
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
+    public static String doPut(String url, String token, String jsonStr) {
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(url);
+        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(35000).setConnectionRequestTimeout(35000).setSocketTimeout(60000).build();
+        httpPut.setConfig(requestConfig);
+        httpPut.setHeader("Content-type", "application/json");
+        httpPut.setHeader("DataEncoding", "UTF-8");
+        httpPut.setHeader("token", token);
+
+        CloseableHttpResponse httpResponse = null;
+        try {
+            httpPut.setEntity(new StringEntity(jsonStr));
+            httpResponse = httpClient.execute(httpPut);
+            HttpEntity entity = httpResponse.getEntity();
+            String result = EntityUtils.toString(entity);
+            return result;
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            if (null != httpClient) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
     }
 }

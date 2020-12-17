@@ -11,9 +11,13 @@ import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.model.Device;
 import com.ss.sdk.model.Issue;
 import com.ss.sdk.model.WhiteList;
+import com.ss.sdk.pojo.terminal.person.PersonInfoList;
+import com.ss.sdk.pojo.terminal.request.ImageLists;
+import com.ss.sdk.pojo.terminal.request.PersonInfoLists;
 import com.ss.sdk.socket.MyWebSocketLL;
 import com.ss.sdk.utils.*;
 import com.sun.jna.NativeLong;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
@@ -153,6 +157,52 @@ public class GetIssueDataJob implements SimpleJob {
                             issue.setIssueStatus(2);
                             issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
                             issue.setErrorMessage("创建人员失败");
+                            this.deviceMapper.insertIssue(issue);
+                        }
+                    }
+                }
+                else if (device.getDeviceType() == 6){
+                    //宇视下发
+                    Map<String, Object> para = new HashMap<>();
+                    para.put("Num", 1);
+                    List<PersonInfoLists> personList = new ArrayList<>();
+                    PersonInfoLists PersonInfoList = new PersonInfoLists();
+                    PersonInfoList.setPersonID(Integer.valueOf(issue.getPeopleId()) );
+                    PersonInfoList.setLastChange(System.currentTimeMillis());
+                    PersonInfoList.setPersonName(issue.getPeopleId());
+                    PersonInfoList.setTimeTemplateNum(0);
+                    PersonInfoList.setIdentificationNum(0);
+                    PersonInfoList.setImageNum(1);
+                    List<ImageLists> imagList = new ArrayList();
+                    ImageLists ImageList = new ImageLists();
+                    ImageList.setFaceID(1);
+                    ImageList.setName(issue.getPeopleFacePath());
+                    String image = Base64Util.imagebase64(issue.getPeopleFacePath()).replaceAll("(\\\r\\\n|\\\r|\\\n|\\\n\\\r)", "");
+                    ImageList.setData(image);
+                    ImageList.setSize(String.valueOf(Base64Util.getLength(image)) );
+                    imagList.add(ImageList);
+                    PersonInfoList.setImageList(imagList);
+                    personList.add(PersonInfoList);
+                    para.put("PersonInfoList", personList);
+                    String request = JSON.toJSONString(para);
+                    String result = this.baseHttpUtil.httpPost(request, "http://" + device.getIp() + ":" + device.getPort() + HttpConstant.YUSHI_INSERT_PEOPLE);
+                    JSONObject resultJson = null;
+                    String resultStr = null;
+                    if (null != result) {
+                        resultJson = JSONObject.parseObject(result);
+                        JSONObject re =  (JSONObject)resultJson.get("Response");
+                        resultStr = re.get("ResponseString").toString();
+                        if("Succeed".equals(resultStr)){
+                            issue.setIssueStatus(1);
+                            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                            //添加白名单
+                            this.deviceMapper.insertWhiteList(issue);
+                            //添加下发信息表
+                            this.deviceMapper.insertIssue(issue);
+                        }else{
+                            issue.setIssueStatus(2);
+                            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                            issue.setErrorMessage("人脸检测失败");
                             this.deviceMapper.insertIssue(issue);
                         }
                     }
