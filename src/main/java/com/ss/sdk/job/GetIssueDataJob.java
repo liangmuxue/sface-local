@@ -161,7 +161,7 @@ public class GetIssueDataJob implements SimpleJob {
                         }
                     }
                 }
-                else if (device.getDeviceType() == 6){
+                /*else if (device.getDeviceType() == 6){
                     //宇视下发
                     Map<String, Object> para = new HashMap<>();
                     para.put("Num", 1);
@@ -206,7 +206,7 @@ public class GetIssueDataJob implements SimpleJob {
                             this.deviceMapper.insertIssue(issue);
                         }
                     }
-                }
+                }*/
             }
             List<Issue> list = this.deviceMapper.findIssueList();
             Map<String, Object> parmIssue = new HashMap<>();
