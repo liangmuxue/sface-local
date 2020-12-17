@@ -64,6 +64,7 @@ public class HttpClientHandler extends ChannelInboundHandlerAdapter {
             TerminalHttpCall.setResultQueue(lapiResponse);
         } else {
             if (StringUtils.contains(content, "/LAPI/V1.0/PACS/Controller/Event/Notifications")) {
+                logger.info("推送接收" + content);
                int postNum = content.indexOf("POST");
                int closeNum = content.indexOf("close");
                if(postNum != 0){
@@ -73,6 +74,7 @@ public class HttpClientHandler extends ChannelInboundHandlerAdapter {
                    data = "";
                    data = content.substring(closeNum +5);
                }else{
+                   logger.info("推送接收拼接" + content);
                    data = "";
                    int index = content.indexOf("{");
                    data = data + content.substring(index);
