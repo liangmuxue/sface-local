@@ -34,7 +34,6 @@ public class CaptureDataJob implements SimpleJob {
     public void execute(ShardingContext shardingContext) {
         logger.info("定时任务CaptureDataJob已经启动" + new Date().toString());
         List<Capture> commonCaptureList = this.deviceMapper.findCommonCaptureList(new Capture());
-        logger.info("获取common内容" + commonCaptureList.toString());
         long maxCommonTime = 0;
         //String maxCommonTime = this.deviceMapper.findCommonMaxTime();
         if (commonCaptureList.size() > 0){
@@ -58,7 +57,6 @@ public class CaptureDataJob implements SimpleJob {
             this.deviceMapper.updateCommonTime(String.valueOf(maxCommonTime));
         }
         List<Capture> remoteCaptureList = this.deviceMapper.findRemoteCaptureList();
-        logger.info("获取remote内容" + remoteCaptureList.toString());
         //String maxRemoteTime = this.deviceMapper.findRemoteMaxTime();
         long maxRemoteTime = 0;
         if (remoteCaptureList.size() > 0){
