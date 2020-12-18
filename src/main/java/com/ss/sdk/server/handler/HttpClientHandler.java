@@ -69,10 +69,12 @@ public class HttpClientHandler extends ChannelInboundHandlerAdapter {
                int closeNum = content.indexOf("close");
                if(postNum != 0){
                    data = data + content.substring(0,postNum);
+                   logger.info("拼接完成" + content);
                    PersonVerification personVerification = JSON.parseObject(data, PersonVerification.class);
                    this.personDataService.addPerson(personVerification);
                    data = "";
                    data = content.substring(closeNum +5);
+                   logger.info("剩余拼接内容" + content);
                }else{
                    logger.info("推送接收拼接" + content);
                    data = "";
