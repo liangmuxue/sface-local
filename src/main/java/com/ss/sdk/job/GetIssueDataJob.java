@@ -163,6 +163,10 @@ public class GetIssueDataJob implements SimpleJob {
                 }
                 else if (device.getDeviceType() == 6){
                     //宇视下发
+                    if(StringUtils.isBlank(issue.getPeopleFacePath())){
+                        this.logger.error("人员无照片");
+                        continue;
+                    }
                     Map<String, Object> para = new HashMap<>();
                     para.put("Num", 1);
                     List<PersonInfoLists> personList = new ArrayList<>();
