@@ -18,6 +18,7 @@ public class Issue {
     private Integer issueStatus;
     private String errorMessage;
     private String deviceId;
+    private String peopleName;
 
     public Integer getId() {
         return id;
@@ -97,5 +98,13 @@ public class Issue {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getPeopleName() {
+        return peopleName;
+    }
+
+    public void setPeopleName(String peopleName) {
+        this.peopleName = peopleName;
     }
 }

@@ -191,7 +191,7 @@ public class GetIssueDataJob implements SimpleJob {
                         PersonInfoLists PersonInfoList = new PersonInfoLists();
                         PersonInfoList.setPersonID(Integer.valueOf(issue.getPeopleId()));
                         PersonInfoList.setLastChange(System.currentTimeMillis());
-                        PersonInfoList.setPersonName(issue.getPeopleId());
+                        PersonInfoList.setPersonName(issue.getPeopleName());
                         PersonInfoList.setTimeTemplateNum(0);
                         PersonInfoList.setIdentificationNum(0);
                         PersonInfoList.setImageNum(1);
