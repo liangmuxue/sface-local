@@ -57,5 +57,7 @@ public class HttpConstant {
 
     public static String YUSHI_INSERT_PEOPLE = "/LAPI/V1.0/PeopleLibraries/3/People";
 
+    public static String YUSHI_DELETE_PEOPLE = "/LAPI/V1.0/PeopleLibraries/3/People/";
+
     public static String YUSHI_REMOTE_DOOR = "/LAPI/V1.0/PACS/Controller/RemoteOpened";
 }

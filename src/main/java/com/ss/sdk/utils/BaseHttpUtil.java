@@ -12,10 +12,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -186,6 +183,58 @@ public class BaseHttpUtil {
         try {
             httpPut.setEntity(new StringEntity(jsonStr));
             httpResponse = httpClient.execute(httpPut);
+            HttpEntity entity = httpResponse.getEntity();
+            String result = EntityUtils.toString(entity);
+            return result;
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            if (null != httpClient) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 发送delete请求
+     *
+     * @param url
+     * @param token
+     * @param jsonStr
+     * @return
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
+    public  String doDelete(String url, String token, String jsonStr) {
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpDelete httpDelete = new HttpDelete(url);
+        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(35000).setConnectionRequestTimeout(35000).setSocketTimeout(60000).build();
+        httpDelete.setConfig(requestConfig);
+        httpDelete.setHeader("Content-type", "application/json");
+        httpDelete.setHeader("DataEncoding", "UTF-8");
+        httpDelete.setHeader("token", token);
+
+        CloseableHttpResponse httpResponse = null;
+        try {
+            httpResponse = httpClient.execute(httpDelete);
             HttpEntity entity = httpResponse.getEntity();
             String result = EntityUtils.toString(entity);
             return result;

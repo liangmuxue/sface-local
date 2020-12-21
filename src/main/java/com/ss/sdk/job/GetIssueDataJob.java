@@ -161,53 +161,72 @@ public class GetIssueDataJob implements SimpleJob {
                         }
                     }
                 }
-                else if (device.getDeviceType() == 6){
-                    //宇视下发
-                    if(StringUtils.isBlank(issue.getPeopleFacePath())){
-                        this.logger.error("人员无照片");
-                        continue;
-                    }
-                    Map<String, Object> para = new HashMap<>();
-                    para.put("Num", 1);
-                    List<PersonInfoLists> personList = new ArrayList<>();
-                    PersonInfoLists PersonInfoList = new PersonInfoLists();
-                    PersonInfoList.setPersonID(Integer.valueOf(issue.getPeopleId()) );
-                    PersonInfoList.setLastChange(System.currentTimeMillis());
-                    PersonInfoList.setPersonName(issue.getPeopleId());
-                    PersonInfoList.setTimeTemplateNum(0);
-                    PersonInfoList.setIdentificationNum(0);
-                    PersonInfoList.setImageNum(1);
-                    List<ImageLists> imagList = new ArrayList();
-                    ImageLists ImageList = new ImageLists();
-                    ImageList.setFaceID(1);
-                    ImageList.setName(issue.getPeopleFacePath());
-                    String image = Base64Util.imagebase64(issue.getPeopleFacePath()).replaceAll("(\\\r\\\n|\\\r|\\\n|\\\n\\\r)", "");
-                    ImageList.setData(image);
-                    ImageList.setSize(String.valueOf(Base64Util.getLength(image)) );
-                    imagList.add(ImageList);
-                    PersonInfoList.setImageList(imagList);
-                    personList.add(PersonInfoList);
-                    para.put("PersonInfoList", personList);
-                    String request = JSON.toJSONString(para);
-                    String result = this.baseHttpUtil.httpPost(request, "http://" + device.getIp() + ":" + device.getPort() + HttpConstant.YUSHI_INSERT_PEOPLE);
-                    JSONObject resultJson = null;
-                    String resultStr = null;
-                    if (null != result) {
-                        resultJson = JSONObject.parseObject(result);
-                        JSONObject re =  (JSONObject)resultJson.get("Response");
-                        resultStr = re.get("ResponseString").toString();
-                        if("Succeed".equals(resultStr)){
-                            issue.setIssueStatus(1);
-                            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
-                            //添加白名单
-                            this.deviceMapper.insertWhiteList(issue);
-                            //添加下发信息表
-                            this.deviceMapper.insertIssue(issue);
-                        }else{
-                            issue.setIssueStatus(2);
-                            issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
-                            issue.setErrorMessage("人脸检测失败");
-                            this.deviceMapper.insertIssue(issue);
+                else if (device.getDeviceType() == 6) {
+                    if (issue.getTaskType() == -1) {
+                        //删除
+                        Map<String, Object> map = new HashMap();
+                        map.put("LastChange", System.currentTimeMillis() / 1000);
+                        String jsonStr = JSON.toJSONString(map);
+                        String res = this.baseHttpUtil.doDelete("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.YUSHI_DELETE_PEOPLE + issue.getPeopleId(), null, jsonStr);
+                        JSONObject resul = null;
+                        String resultStr = null;
+                        if(null != res){
+                            resul = JSONObject.parseObject(res);
+                            JSONObject r = (JSONObject) resul.get("Response");
+                            resultStr = r.get("ResponseString").toString();
+                            if("Succeed".equals(resultStr)){
+                                this.deviceMapper.delWhiteList(issue);
+                                this.logger.info("宇视设备删除人员成功");
+                            }
+                        }
+                    } else {
+                        //宇视下发
+                        if (StringUtils.isBlank(issue.getPeopleFacePath())) {
+                            this.logger.error("人员无照片");
+                            continue;
+                        }
+                        Map<String, Object> para = new HashMap<>();
+                        para.put("Num", 1);
+                        List<PersonInfoLists> personList = new ArrayList<>();
+                        PersonInfoLists PersonInfoList = new PersonInfoLists();
+                        PersonInfoList.setPersonID(Integer.valueOf(issue.getPeopleId()));
+                        PersonInfoList.setLastChange(System.currentTimeMillis());
+                        PersonInfoList.setPersonName(issue.getPeopleId());
+                        PersonInfoList.setTimeTemplateNum(0);
+                        PersonInfoList.setIdentificationNum(0);
+                        PersonInfoList.setImageNum(1);
+                        List<ImageLists> imagList = new ArrayList();
+                        ImageLists ImageList = new ImageLists();
+                        ImageList.setFaceID(1);
+                        ImageList.setName(issue.getPeopleFacePath());
+                        String image = Base64Util.imagebase64(issue.getPeopleFacePath()).replaceAll("(\\\r\\\n|\\\r|\\\n|\\\n\\\r)", "");
+                        ImageList.setData(image);
+                        ImageList.setSize(String.valueOf(Base64Util.getLength(image)));
+                        imagList.add(ImageList);
+                        PersonInfoList.setImageList(imagList);
+                        personList.add(PersonInfoList);
+                        para.put("PersonInfoList", personList);
+                        String request = JSON.toJSONString(para);
+                        String result = this.baseHttpUtil.httpPost(request, "http://" + device.getIp() + ":" + device.getPort() + HttpConstant.YUSHI_INSERT_PEOPLE);
+                        JSONObject resultJson = null;
+                        String resultStr = null;
+                        if (null != result) {
+                            resultJson = JSONObject.parseObject(result);
+                            JSONObject re = (JSONObject) resultJson.get("Response");
+                            resultStr = re.get("ResponseString").toString();
+                            if ("Succeed".equals(resultStr)) {
+                                issue.setIssueStatus(1);
+                                issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                                //添加白名单
+                                this.deviceMapper.insertWhiteList(issue);
+                                //添加下发信息表
+                                this.deviceMapper.insertIssue(issue);
+                            } else {
+                                issue.setIssueStatus(2);
+                                issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
+                                issue.setErrorMessage("人脸检测失败");
+                                this.deviceMapper.insertIssue(issue);
+                            }
                         }
                     }
                 }
