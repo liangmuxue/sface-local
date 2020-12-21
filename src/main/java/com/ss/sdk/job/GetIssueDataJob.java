@@ -235,7 +235,7 @@ public class GetIssueDataJob implements SimpleJob {
                                 issue.setIssueStatus(2);
                                 issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
                                 issue.setErrorMessage("照片添加设备失败");
-                                this.logger.info("设备下发失败");
+                                this.logger.info("设备下发失败：" + resuCode);
                                 this.deviceMapper.insertIssue(issue);
                             }
                         }
