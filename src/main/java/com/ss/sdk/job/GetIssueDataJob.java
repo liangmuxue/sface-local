@@ -208,23 +208,34 @@ public class GetIssueDataJob implements SimpleJob {
                         para.put("PersonInfoList", personList);
                         String request = JSON.toJSONString(para);
                         String result = this.baseHttpUtil.httpPost(request, "http://" + device.getIp() + ":" + device.getPort() + HttpConstant.YUSHI_INSERT_PEOPLE);
+                        this.logger.info("设备添加照片结束！");
                         JSONObject resultJson = null;
                         String resultStr = null;
                         if (null != result) {
+                            //获取返回信息
                             resultJson = JSONObject.parseObject(result);
                             JSONObject re = (JSONObject) resultJson.get("Response");
                             resultStr = re.get("ResponseString").toString();
-                            if ("Succeed".equals(resultStr)) {
+                            //获取返回码
+                            JSONObject da = (JSONObject)re.get("Data");
+                            JSONArray arr1 = (JSONArray)da.get("PersonList");
+                            JSONObject personListObj = (JSONObject)arr1.get(0);
+                            JSONArray arr2 =(JSONArray)personListObj.get("FaceList");
+                            JSONObject faceListObj = (JSONObject)arr2.get(0);
+                            String resuCode = faceListObj.get("ResultCode").toString();
+                            if ("Succeed".equals(resultStr) && "0".equals(resuCode)) {
                                 issue.setIssueStatus(1);
                                 issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
                                 //添加白名单
                                 this.deviceMapper.insertWhiteList(issue);
                                 //添加下发信息表
                                 this.deviceMapper.insertIssue(issue);
+                                this.logger.info("设备下发成功");
                             } else {
                                 issue.setIssueStatus(2);
                                 issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
-                                issue.setErrorMessage("人脸检测失败");
+                                issue.setErrorMessage("照片添加设备失败");
+                                this.logger.info("设备下发失败");
                                 this.deviceMapper.insertIssue(issue);
                             }
                         }
