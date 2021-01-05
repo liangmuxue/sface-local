@@ -89,9 +89,9 @@ public class PersonDataServiceImpl implements IPersonDataService {
                 sfaceCapture.setTemp(personVerification.getFaceInfoList().get(0).getTemperature());
                 //插入体温类型
                 if(personVerification.getFaceInfoList().get(0).getTemperature() >= 37.5 ){
-                    sfaceCapture.setTempState(0);
-                }else{
                     sfaceCapture.setTempState(1);
+                }else{
+                    sfaceCapture.setTempState(0);
                 }
                 sfaceCapture.setCreateTime(System.currentTimeMillis());
                 //插入数据
