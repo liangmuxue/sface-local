@@ -14,6 +14,7 @@ public class JobProperties {
     private String getIssueDataJob;
     private String captureDataJob;
     private String ipJob;
+    private String pushPictureJob;
 
     public int getShardingTotalCount() {
         return shardingTotalCount;
@@ -53,5 +54,13 @@ public class JobProperties {
 
     public void setIpJob(String ipJob) {
         this.ipJob = ipJob;
+    }
+
+    public String getPushPictureJob() {
+        return pushPictureJob;
+    }
+
+    public void setPushPictureJob(String pushPictureJob) {
+        this.pushPictureJob = pushPictureJob;
     }
 }

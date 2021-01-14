@@ -30,6 +30,12 @@ public class PropertiesUtil {
     private String passwordLL;
     private String tempPictureUrl;
 
+    private String ftpIp;
+    private int ftpPort;
+    private String ftpUserName;
+    private String ftppassWord;
+    private String picUrl;
+
     public PropertiesUtil() {
     }
 
@@ -145,4 +151,43 @@ public class PropertiesUtil {
         this.tempPictureUrl = tempPictureUrl;
     }
 
+    public String getFtpIp() {
+        return ftpIp;
+    }
+
+    public void setFtpIp(String ftpIp) {
+        this.ftpIp = ftpIp;
+    }
+
+    public int getFtpPort() {
+        return ftpPort;
+    }
+
+    public void setFtpPort(int ftpPort) {
+        this.ftpPort = ftpPort;
+    }
+
+    public String getFtpUserName() {
+        return ftpUserName;
+    }
+
+    public void setFtpUserName(String ftpUserName) {
+        this.ftpUserName = ftpUserName;
+    }
+
+    public String getFtppassWord() {
+        return ftppassWord;
+    }
+
+    public void setFtppassWord(String ftppassWord) {
+        this.ftppassWord = ftppassWord;
+    }
+
+    public String getPicUrl() {
+        return picUrl;
+    }
+
+    public void setPicUrl(String picUrl) {
+        this.picUrl = picUrl;
+    }
 }
