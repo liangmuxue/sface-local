@@ -196,10 +196,11 @@ public class MyWebSocketClient extends WebSocketClient {
     }
 
     private void reConnect() {
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    Thread.sleep(5000);
                     logger.info("开始尝试重新连接...");
                     MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
                     boolean f = client.connectBlocking();
@@ -213,6 +214,7 @@ public class MyWebSocketClient extends WebSocketClient {
                     e.printStackTrace();
                 }
             }
-        }).run();
+        });
+        SysThreadPool.getThread().execute(thread);
     }
 }

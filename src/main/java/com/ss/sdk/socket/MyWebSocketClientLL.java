@@ -230,7 +230,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
         logger.info("客户端已关闭!");
         if (uri.contains(HttpConstant.LL_EVENT)) {
             logger.info("开始尝试重新连接冠林服务器...");
-            new Thread(new Runnable() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -240,7 +240,8 @@ public class MyWebSocketClientLL extends WebSocketClient {
                         e.printStackTrace();
                     }
                 }
-            }).start();
+            });
+            SysThreadPool.getThread().execute(thread);
         }
     }
 
