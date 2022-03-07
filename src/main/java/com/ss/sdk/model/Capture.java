@@ -1,28 +1,47 @@
 package com.ss.sdk.model;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 /**
  * 抓拍信息类
  * @author 李爽超 chao
  * @create 2019/12/16
  * @email lishuangchao@ss-cas.com
  **/
+@Table(name = "sface_capture")
 public class Capture {
 
+    @Id
     private Integer id;
+    @Column(name = "people_id")
     private String peopleId;
-    private String deviceId;
-    private Integer opendoorMode;
-    private Integer resultCode;
-    private String captureUrl;
-    private String captureFullUrl;
-    private String compareDate;
+    @Column(name = "product_code")
     private String productCode;
-    private String spotImgPath;
-    private String panoramaPath;
+    @Column(name = "opendoor_mode")
+    private Integer opendoorMode;
+    @Column(name = "recog_score")
     private Float recogScore;
+    @Column(name = "result_code")
+    private Integer resultCode;
+    @Column(name = "capture_url")
+    private String captureUrl;
+    @Column(name = "capture_full_url")
+    private String captureFullUrl;
+    @Column(name = "compare_date")
+    private Long compareDate;
     private Double temp;
+    @Column(name = "temp_state")
     private Integer tempState;
-    private String createTime;
+    @Column(name = "create_time")
+    private Long createTime;
+    private String code;
+    @Transient
+    private String captureBase64;
+    @Transient
+    private String fullBase64;
 
     public Integer getId() {
         return id;
@@ -40,12 +59,12 @@ public class Capture {
         this.peopleId = peopleId;
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public String getProductCode() {
+        return productCode;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
     }
 
     public Integer getOpendoorMode() {
@@ -54,6 +73,14 @@ public class Capture {
 
     public void setOpendoorMode(Integer opendoorMode) {
         this.opendoorMode = opendoorMode;
+    }
+
+    public Float getRecogScore() {
+        return recogScore;
+    }
+
+    public void setRecogScore(Float recogScore) {
+        this.recogScore = recogScore;
     }
 
     public Integer getResultCode() {
@@ -80,44 +107,12 @@ public class Capture {
         this.captureFullUrl = captureFullUrl;
     }
 
-    public String getCompareDate() {
+    public Long getCompareDate() {
         return compareDate;
     }
 
-    public void setCompareDate(String compareDate) {
+    public void setCompareDate(Long compareDate) {
         this.compareDate = compareDate;
-    }
-
-    public String getProductCode() {
-        return productCode;
-    }
-
-    public void setProductCode(String productCode) {
-        this.productCode = productCode;
-    }
-
-    public String getSpotImgPath() {
-        return spotImgPath;
-    }
-
-    public void setSpotImgPath(String spotImgPath) {
-        this.spotImgPath = spotImgPath;
-    }
-
-    public String getPanoramaPath() {
-        return panoramaPath;
-    }
-
-    public void setPanoramaPath(String panoramaPath) {
-        this.panoramaPath = panoramaPath;
-    }
-
-    public Float getRecogScore() {
-        return recogScore;
-    }
-
-    public void setRecogScore(Float recogScore) {
-        this.recogScore = recogScore;
     }
 
     public Double getTemp() {
@@ -136,11 +131,35 @@ public class Capture {
         this.tempState = tempState;
     }
 
-    public String getCreateTime() {
+    public Long getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Long createTime) {
         this.createTime = createTime;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getCaptureBase64() {
+        return captureBase64;
+    }
+
+    public void setCaptureBase64(String captureBase64) {
+        this.captureBase64 = captureBase64;
+    }
+
+    public String getFullBase64() {
+        return fullBase64;
+    }
+
+    public void setFullBase64(String fullBase64) {
+        this.fullBase64 = fullBase64;
     }
 }

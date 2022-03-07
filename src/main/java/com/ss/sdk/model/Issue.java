@@ -1,24 +1,47 @@
 package com.ss.sdk.model;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 /**
  * 下发设备类
  * @author 李爽超 chao
  * @create 2019/12/11
  * @email lishuangchao@ss-cas.com
  **/
+@Table(name = "sface_issue")
 public class Issue {
 
+    @Id
     private Integer id;
+    @Column(name = "people_id")
     private String peopleId;
-    private String productCode;
+    @Column(name = "people_face_path")
     private String peopleFacePath;
-    private String issueTime;
-    private String returnResult;
-    private Integer taskType;
+    @Column(name = "issue_time")
+    private Long issueTime;
+    @Column(name = "return_result")
+    private Integer returnResult;
+    @Column(name = "issue_status")
     private Integer issueStatus;
-    private String errorMessage;
-    private String deviceId;
+    @Column(name = "fail_reason")
+    private String failReason;
+    @Column(name = "product_code")
+    private String productCode;
+    @Transient
+    private Integer taskType;
+    @Transient
     private String peopleName;
+    @Transient
+    private String cardId;
+    @Transient
+    private String deviceId;
+    @Transient
+    private String devicePeopleId;
+    @Transient
+    private String code;
 
     public Integer getId() {
         return id;
@@ -36,14 +59,6 @@ public class Issue {
         this.peopleId = peopleId;
     }
 
-    public String getProductCode() {
-        return productCode;
-    }
-
-    public void setProductCode(String productCode) {
-        this.productCode = productCode;
-    }
-
     public String getPeopleFacePath() {
         return peopleFacePath;
     }
@@ -52,28 +67,20 @@ public class Issue {
         this.peopleFacePath = peopleFacePath;
     }
 
-    public String getIssueTime() {
+    public Long getIssueTime() {
         return issueTime;
     }
 
-    public void setIssueTime(String issueTime) {
+    public void setIssueTime(Long issueTime) {
         this.issueTime = issueTime;
     }
 
-    public String getReturnResult() {
+    public Integer getReturnResult() {
         return returnResult;
     }
 
-    public void setReturnResult(String returnResult) {
+    public void setReturnResult(Integer returnResult) {
         this.returnResult = returnResult;
-    }
-
-    public Integer getTaskType() {
-        return taskType;
-    }
-
-    public void setTaskType(Integer taskType) {
-        this.taskType = taskType;
     }
 
     public Integer getIssueStatus() {
@@ -84,12 +91,45 @@ public class Issue {
         this.issueStatus = issueStatus;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getFailReason() {
+        return failReason;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setFailReason(String failReason) {
+        this.failReason = failReason;
+    }
+
+
+    public String getProductCode() {
+        return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+    }
+
+    public Integer getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(Integer taskType) {
+        this.taskType = taskType;
+    }
+
+    public String getPeopleName() {
+        return peopleName;
+    }
+
+    public void setPeopleName(String peopleName) {
+        this.peopleName = peopleName;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
     }
 
     public String getDeviceId() {
@@ -100,11 +140,19 @@ public class Issue {
         this.deviceId = deviceId;
     }
 
-    public String getPeopleName() {
-        return peopleName;
+    public String getDevicePeopleId() {
+        return devicePeopleId;
     }
 
-    public void setPeopleName(String peopleName) {
-        this.peopleName = peopleName;
+    public void setDevicePeopleId(String devicePeopleId) {
+        this.devicePeopleId = devicePeopleId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

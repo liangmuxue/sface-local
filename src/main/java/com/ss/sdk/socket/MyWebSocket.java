@@ -8,7 +8,6 @@ import org.java_websocket.drafts.Draft_6455;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import java.net.URI;
@@ -38,7 +37,7 @@ public class MyWebSocket implements ApplicationRunner {
         //判断连接状态
         if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
             logger.info("成功链接云端服务器!");
-            client.send("{'type':'register','tenantId':'" + propertiesUtil.getTenantId() + "'}");
+            client.send("{'type':'client','tenantId':'CLIENT_" + propertiesUtil.getTenantId() + "'}");
         }
     }
 }

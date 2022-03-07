@@ -62,7 +62,7 @@ public class BaseHttpUtil {
     public String httpPost(String parmJson, String requestUrl) {
         String result = null;
         try {
-            if (!requestUrl.equals(propertiesUtil.getCplatHttp() + HttpConstant.TOKEN)) {
+            if (!requestUrl.equals(propertiesUtil.getServerHttp() + HttpConstant.TOKEN)) {
                 if (System.currentTimeMillis() > tokenTime) {
                     login();
                 }
@@ -77,7 +77,7 @@ public class BaseHttpUtil {
             httpPost.setEntity(new StringEntity(parmJson, ContentType.APPLICATION_JSON));
             httpPost.addHeader("Content-Type", APPLICATION_JSON);
             httpPost.addHeader("X-Authorization", token);
-            httpPost.addHeader("Tenant-Id", propertiesUtil.getTenantId());
+            httpPost.addHeader("Tenant-Name", propertiesUtil.getTenantName());
             HttpResponse response = httpClient.execute(httpPost);
             HttpEntity entity = response.getEntity();
             if (entity != null) {
@@ -99,7 +99,7 @@ public class BaseHttpUtil {
         parm.put("password", propertiesUtil.getPassword());
         // 发起鉴权请求并获取请求结果
         Object jsonObject = JSONObject.toJSON(parm);
-        String resultString = httpPost(jsonObject.toString(), propertiesUtil.getCplatHttp() + HttpConstant.TOKEN);
+        String resultString = httpPost(jsonObject.toString(), propertiesUtil.getServerHttp() + HttpConstant.TOKEN);
         String code = null;
         JSONObject jsobj = null;
         if (null != resultString) {

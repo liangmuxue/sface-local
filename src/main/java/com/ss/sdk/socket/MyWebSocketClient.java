@@ -1,7 +1,6 @@
 package com.ss.sdk.socket;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ss.sdk.Client.*;
 import com.ss.sdk.mapper.DeviceMapper;
 import com.ss.sdk.model.Capture;
 import com.ss.sdk.model.Device;
@@ -25,20 +24,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.ss.sdk.job.MyApplicationRunner.hCNetSDK;
-
 public class MyWebSocketClient extends WebSocketClient {
 
     private static final Logger logger = LogManager.getLogger(MyWebSocketClient.class);
 
     private JedisUtil jedisUtil = ApplicationContextProvider.getBean(JedisUtil.class);
-    private RemoteControl remoteControl = ApplicationContextProvider.getBean(RemoteControl.class);
-    private CardCfg cardCfg = ApplicationContextProvider.getBean(CardCfg.class);
-    private FaceParamCfg faceParamCfg = ApplicationContextProvider.getBean(FaceParamCfg.class);
     private PropertiesUtil propertiesUtil = ApplicationContextProvider.getBean(PropertiesUtil.class);
     private DeviceMapper deviceMapper = ApplicationContextProvider.getBean(DeviceMapper.class);
-    private Alarm alarm = ApplicationContextProvider.getBean(Alarm.class);
-    private Basics basics = ApplicationContextProvider.getBean(Basics.class);
     private MyWebSocketLL myWebSocketLL = ApplicationContextProvider.getBean(MyWebSocketLL.class);
     private BaseHttpUtil baseHttpUtil = ApplicationContextProvider.getBean(BaseHttpUtil.class);
 
@@ -59,124 +51,21 @@ public class MyWebSocketClient extends WebSocketClient {
             public void run() {
                 JSONObject jsonObject = JSONObject.parseObject(message);
                 String command = jsonObject.getString("command");
-                String deviceId = jsonObject.getString("deviceId");
-                String peopleId = jsonObject.getString("peopleId");
-                String captureUrl = jsonObject.getString("captureUrl");
+                String code = jsonObject.getString("code");
+                String productCode = jsonObject.getString("productCode");
+                Long time = jsonObject.getLong("time");
                 Issue issue = new Issue();
-                issue.setProductCode(deviceId);
+                issue.setProductCode(productCode);
                 Device d = new Device();
                 d.setProductCode(issue.getProductCode());
-                Device device = deviceMapper.findDevice(d);
-                if ("opendoor".equals(command) && deviceId != null && !"".equals(deviceId)) {
-                    if (device.getDeviceType() == 1) {
-                        boolean isResult = remoteControl.controlGateWay((NativeLong) jedisUtil.get(deviceId));
-                        if (isResult) {
-                            logger.info("远程开门成功");
-                        } else {
-                            logger.info("远程开门失败");
-                            Capture capture = new Capture();
-                            capture.setOpendoorMode(2);
-                            capture.setResultCode(0);
-                            capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
-                            MyWebSocketClient.this.deviceMapper.insertCapture(capture);
-                            int iErr = hCNetSDK.NET_DVR_GetLastError();
-                            logger.info("建立长连接失败，错误号：" + iErr);
-                            if (iErr == 47) {
-                                NativeLong userId = MyWebSocketClient.this.basics.login(device.getIp(), device.getPort(), device.getUserName(), device.getPassword());
-                                if (userId.intValue() != -1) {
-                                    MyWebSocketClient.this.jedisUtil.set(String.valueOf(device.getCplatDeviceId()), userId);
-                                }
-                                int alarmHandle = MyWebSocketClient.this.alarm.SetupAlarmChan(userId);
-                                if (alarmHandle == -1) {
-                                    int error = hCNetSDK.NET_DVR_GetLastError();
-                                    logger.info("设备" + device.getCplatDeviceId() + "布防失败，错误码：" + error);
-                                } else {
-                                    logger.info("设备" + device.getCplatDeviceId() + "布防成功");
-                                }
-                            }
-                        }
-                    } else if (device.getDeviceType() == 3) {
+                d.setIsDelete(1);
+                Device device = deviceMapper.selectOne(d);
+                if ("opendoor".equals(command) && productCode != null && !"".equals(productCode)) {
+                    if (device.getDeviceType() == 3) {
                         issue.setDeviceId(device.getDeviceId());
+                        issue.setIssueTime(time);
+                        issue.setCode(code);
                         myWebSocketLL.openDoor(issue);
-                    } else if (device.getDeviceType() == 4) {
-                        Capture capture = new Capture();
-                        List<NameValuePair> param = new ArrayList<NameValuePair>();
-                        NameValuePair pair = new BasicNameValuePair("pass", device.getPassword());
-                        param.add(pair);
-                        String opendoorResult = baseHttpUtil.httpPostUrl("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.GUANPIN_DEVICE_OPENDOOR_CONTROL, param);
-                        if (baseHttpUtil.guanpinIsResult(opendoorResult)) {
-                            logger.info("冠品设备" + device.getCplatDeviceId() + "远程开门成功");
-                            capture.setResultCode(1);
-                        } else {
-                            logger.info("冠品设备" + device.getCplatDeviceId() + "远程开门失败");
-                            capture.setResultCode(0);
-                        }
-                        capture.setDeviceId(device.getDeviceId());
-//                        try {
-//                            SimpleDateFormat sf = new SimpleDateFormat("yyyyMMddHHmmss");
-//                            String newName = sf.format(new Date());
-//                            String url = propertiesUtil.getCaptureUrl() + "/" + capture.getDeviceId() + "_" + newName + ".jpg";
-//                            //抓拍人脸
-//                            String faceCaptureResult = baseHttpUtil.httpPostUrl("http://" + device.getIp() + ":" + device.getPort() + HttpConstant.GUANPIN_FACE_CAPTURE, param);
-//                            if (baseHttpUtil.guanpinIsResult(faceCaptureResult)) {
-//                                String data = null;
-//                                JSONObject jsobj = null;
-//                                jsobj = JSONObject.parseObject(faceCaptureResult);
-//                                if (jsobj != null) {
-//                                    data = jsobj.get("data").toString();
-//                                    jsobj = JSONObject.parseObject(data);
-//                                    if (jsobj.size() > 0) {
-//                                        data = jsobj.get("imgData").toString();
-//                                    }
-//                                }
-//                                Base64Util.saveImg(data, url);
-//                                capture.setCaptureUrl(url);
-//                            }
-//                        } catch (Exception e) {
-//                            logger.info("冠品设备" + device.getCplatDeviceId() + "远程开门图片保存失败" + e.toString(), e);
-//                        }
-                        capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
-                        capture.setOpendoorMode(2);
-                        capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
-                        //保存远程开门信息
-                        deviceMapper.insertCapture(capture);
-                    }
-                    else if(device.getDeviceType() == 6){
-                        //宇视远程开门
-                        Capture capture = new Capture();
-                        String result = baseHttpUtil.doPut( "http://" + device.getIp() + ":" + device.getPort() + HttpConstant.YUSHI_REMOTE_DOOR, null,"{}");
-                        if(null != result){
-                            JSONObject resultJson = JSONObject.parseObject(result);
-                            JSONObject res = (JSONObject)resultJson.get("Response");
-                            String responseStr = res.get("ResponseString").toString();
-                            if("Succeed".equals(responseStr)){
-                                capture.setResultCode(1);
-                                logger.info("宇视设备" + "远程开门成功");
-                            }else{
-                                capture.setResultCode(0);
-                                logger.info("宇视设备" + "远程开门失败");
-                            }
-                            capture.setDeviceId(device.getDeviceId());
-                            capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
-                            capture.setOpendoorMode(2);
-                            capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
-                            //保存远程开门信息
-                            deviceMapper.insertCapture(capture);
-                        }
-                    }
-                }
-                if ("issue".equals(command) && deviceId != null && !"".equals(deviceId) && peopleId != null && !"".equals(peopleId) && captureUrl != null && !"".equals(captureUrl)) {
-                    ;
-                    if (device.getDeviceType() == 1) {
-                        issue.setPeopleId(peopleId);
-                        issue.setPeopleFacePath(captureUrl);
-                        issue.setTaskType(1);
-                        cardCfg.setCardInfo((NativeLong) jedisUtil.get(deviceId), issue);
-                        faceParamCfg.jBtnSetFaceCfg((NativeLong) jedisUtil.get(deviceId), issue);
-                    } else if (device.getDeviceType() == 3) {
-                        issue.setDeviceId(device.getDeviceId().substring(0, 4) + "0001");
-                        //新增住户
-                        myWebSocketLL.tenementAdd(issue);
                     }
                 }
             }
@@ -200,14 +89,14 @@ public class MyWebSocketClient extends WebSocketClient {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(5000);
-                    logger.info("开始尝试重新连接...");
+                    Thread.sleep(60 * 1000);
+                    logger.info("开始尝试重新连接云服务器...");
                     MyWebSocketClient client = new MyWebSocketClient(new URI(propertiesUtil.getWebSocketUrl()), new Draft_6455());
                     boolean f = client.connectBlocking();
                     logger.info("connectBlocking: " + f);
                     if (client.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                        logger.info("成功链接云端服务器!");
-                        client.send("{'type':'register','tenantId':'" + propertiesUtil.getTenantId() + "'}");
+                        logger.info("成功链接云服务器!");
+                        client.send("{'type':'client','tenantId':'CLIENT_" + propertiesUtil.getTenantId() + "'}");
                         MyWebSocket.client = client;
                     }
                 } catch (Exception e) {

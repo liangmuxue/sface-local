@@ -1,12 +1,14 @@
 package com.ss.sdk.socket;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.ss.sdk.job.ContinueRead;
+import com.ss.sdk.mapper.CaptureMapper;
 import com.ss.sdk.mapper.DeviceMapper;
+import com.ss.sdk.mapper.IssueMapper;
+import com.ss.sdk.mapper.WhiteListMapper;
 import com.ss.sdk.model.Capture;
 import com.ss.sdk.model.Device;
 import com.ss.sdk.model.Issue;
+import com.ss.sdk.model.WhiteList;
 import com.ss.sdk.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +31,9 @@ public class MyWebSocketClientLL extends WebSocketClient {
 
     private PropertiesUtil propertiesUtil = ApplicationContextProvider.getBean(PropertiesUtil.class);
     private MyWebSocketLL myWebSocketLL = ApplicationContextProvider.getBean(MyWebSocketLL.class);
+    private WhiteListMapper whiteListMapper = ApplicationContextProvider.getBean(WhiteListMapper.class);
+    private IssueMapper issueMapper = ApplicationContextProvider.getBean(IssueMapper.class);
+    private CaptureMapper captureMapper = ApplicationContextProvider.getBean(CaptureMapper.class);
     private DeviceMapper deviceMapper = ApplicationContextProvider.getBean(DeviceMapper.class);
 
     private String uri;
@@ -61,44 +66,57 @@ public class MyWebSocketClientLL extends WebSocketClient {
                 //登陆回调信息
                 String loginKey = AESUtil.getLoginKey(this.propertiesUtil.getUserNameLL(), this.propertiesUtil.getPasswordLL());
                 String decrypt = AESUtil.decrypt(message, loginKey, loginKey.substring(0, 16));
-                logger.info("检测到服务器请求：" + decrypt);
+                logger.info("检测冠林登陆回调信息：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
-                    String body = jsonObject.getString("Body");
-                    JSONObject jsonBody = JSONObject.parseObject(body);
+                    JSONObject jsonBody = jsonObject.getJSONObject("Body");
                     code = jsonBody.getString("Code");
                     timestamp = jsonBody.getString("Timestamp");
                     sign = jsonBody.getString("Sign");
+                    myWebSocketLL.event();
                 }
             } else if (uri.contains(HttpConstant.LL_TENEMENT_ADD)) {
                 //新增住户回调信息
                 String decrypt = getMessage(message);
-                logger.info("检测到服务器请求：" + decrypt);
+                logger.info("检测到冠林新增住户回调信息：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
                     logger.info("新增住户成功");
-                    String body = jsonObject.getString("Body");
-                    JSONObject bodyObject = JSONObject.parseObject(body);
+                    //新增人脸
+                    JSONObject bodyObject = jsonObject.getJSONObject("Body");
                     String id = bodyObject.getString("ID");
-                    myWebSocketLL.faceAdd(id, this.issue);
+                    issue.setDevicePeopleId(id);
+                    myWebSocketLL.faceAdd(issue);
+                } else {
+                    String failReason = jsonObject.getString("Message");
+                    logger.info("新增住户失败：" + failReason);
                 }
             } else if (uri.contains(HttpConstant.LL_FACE_ADD)) {
                 //新增人脸回调信息
                 String decrypt = getMessage(message);
-                logger.info("检测到服务器请求：" + decrypt);
+                logger.info("检测冠林新增人脸回调信息：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
+                    JSONObject bodyObject = jsonObject.getJSONObject("Body");
+                    String id = bodyObject.getString("TeneID");
+                    WhiteList whiteList = new WhiteList();
+                    whiteList.setPeopleId(issue.getPeopleId());
+                    whiteList.setProductCode(issue.getProductCode());
+                    whiteList.setDevicePeopleId(id);
+                    this.whiteListMapper.insert(whiteList);
+                    issue.setIssueStatus(1);
+                    issue.setReturnResult(0);
+                    issue.setIssueTime(System.currentTimeMillis());
+                    this.issueMapper.insert(issue);
                     logger.info("新增人脸照片成功");
-                    this.issue.setIssueStatus(1);
-                    this.issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
-                    this.deviceMapper.insertIssue(this.issue);
-                    this.deviceMapper.insertWhiteList(this.issue);
                 } else {
-                    logger.info("新增人脸照片失败");
+                    String failReason = jsonObject.getString("Message");
                     this.issue.setIssueStatus(2);
-                    this.issue.setIssueTime(String.valueOf(System.currentTimeMillis()));
-                    this.issue.setErrorMessage("人脸检测失败");
-                    this.deviceMapper.insertIssue(this.issue);
+                    issue.setReturnResult(0);
+                    this.issue.setIssueTime(System.currentTimeMillis());
+                    this.issue.setFailReason(failReason);
+                    this.issueMapper.insert(issue);
+                    logger.info("新增人脸照片失败：" + failReason);
                 }
             } else if (uri.contains(HttpConstant.LL_TENEMENT_DELETE)) {
                 //删除住户回调信息
@@ -106,26 +124,30 @@ public class MyWebSocketClientLL extends WebSocketClient {
                 logger.info("检测到服务器请求：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
+                    WhiteList whiteList = new WhiteList();
+                    whiteList.setProductCode(issue.getProductCode());
+                    whiteList.setPeopleId(issue.getPeopleId());
+                    this.whiteListMapper.delete(whiteList);
                     logger.info("删除住户成功");
-                    this.deviceMapper.delWhiteList(this.issue);
+                } else {
+                    String failReason = jsonObject.getString("Message");
+                    logger.info("删除住户失败：" + failReason);
                 }
-            } else if (uri.contains(HttpConstant.LL_TENEMENT_QUERY)) {
-                //查询住户回调信息
+            } else if (uri.contains(HttpConstant.LL_FACE_REMOVE)) {
+                //删除人脸回调信息
                 String decrypt = getMessage(message);
                 logger.info("检测到服务器请求：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
-                    logger.info("查询住户成功");
-                    String body = jsonObject.getString("Body");
-                    JSONObject bodyObject = JSONObject.parseObject(body);
-                    String list = bodyObject.getString("List");
-                    JSONArray jsonArray = JSONArray.parseArray(list);
-                    if (jsonArray.size() > 0){
-                        String string = jsonArray.getString(0);
-                        JSONObject stringObject = JSONObject.parseObject(string);
-                        String id = stringObject.getString("ID");
-                        this.myWebSocketLL.tenementDelete(id, this.issue);
-                    }
+                    WhiteList whiteList = new WhiteList();
+                    whiteList.setProductCode(issue.getProductCode());
+                    whiteList.setPeopleId(issue.getPeopleId());
+                    this.whiteListMapper.delete(whiteList);
+                    logger.info("删除人脸成功");
+                    myWebSocketLL.faceAdd(this.issue);
+                } else {
+                    String failReason = jsonObject.getString("Message");
+                    logger.info("删除人脸失败：" + failReason);
                 }
             } else if (uri.contains(HttpConstant.LL_EVENT)) {
                 //事件信息
@@ -133,22 +155,30 @@ public class MyWebSocketClientLL extends WebSocketClient {
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("1".equals(jsonObject.getString("EventCode")) && "OpenTheDoor".equals(jsonObject.getString("EventType"))){
                     logger.info("检测到门禁通行事件请求");
-                    String eventData = jsonObject.getString("EventData");
-                    JSONObject eventObject = JSONObject.parseObject(eventData);
+                    JSONObject eventObject = jsonObject.getJSONObject("EventData");
                     String deviceId = eventObject.getString("DeviceId");
                     String openMode = eventObject.getString("OpenMode");
                     String similarity = eventObject.getString("Similarity");
                     String credentialId = eventObject.getString("CredentialID");
                     String imageBase64 = eventObject.getString("ImageBase64");
+                    String recordTime = eventObject.getString("RecordTime");
                     String temp = null;
                     if (eventObject.containsKey("Temperature")){
                         temp = eventObject.getString("Temperature");
                     }
+                    //刷脸开门事件
+                    Capture capture = new Capture();
+                    Device device = new Device();
+                    device.setDeviceId(deviceId);
+                    device.setIsDelete(1);
+                    device = this.deviceMapper.selectOne(device);
+                    if (device == null) {
+                        return;
+                    }
+
                     if("4".equals(openMode)){
-                        //刷脸开门事件
-                        Capture capture = new Capture();
                         capture.setPeopleId(credentialId);
-                        capture.setDeviceId(deviceId);
+                        capture.setProductCode(device.getProductCode());
                         capture.setOpendoorMode(1);
                         capture.setResultCode(1);
                         capture.setRecogScore(Float.valueOf(similarity));
@@ -162,48 +192,37 @@ public class MyWebSocketClientLL extends WebSocketClient {
                         }
                         SimpleDateFormat sf = new SimpleDateFormat("yyyyMMddHHmmss");
                         String newName = sf.format(new Date());
-                        String url = propertiesUtil.getCaptureUrl() + "/" + capture.getDeviceId() + "_" + newName + ".jpg";
+                        String url = propertiesUtil.getCaptureUrl() + "/" + capture.getProductCode() + "_" + newName + ".jpg";
                         Base64Util.saveImg(imageBase64, url);
                         capture.setCaptureUrl(url);
-                        capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
-                        capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
-                        int result = this.deviceMapper.insertCapture(capture);
-                        if (result > 0){
-                            logger.info("刷脸认证信息录入成功，设备编号：" + capture.getDeviceId());
-                            Device d = new Device();
-                            d.setDeviceId(capture.getDeviceId());
-                            Device device = this.deviceMapper.findDevice(d);
-                            if (capture.getTempState() != null && capture.getTempState() == 1) {
-                                MyWebSocket.client.send("{'type':'tempAlarm','peopleId':'" + capture.getPeopleId() + "','temp':'" + temp + "','base64':'" + imageBase64 + "'," + "'deviceId':'" + device.getCplatDeviceId()
-                                        + "','captureTime':'" + capture.getCompareDate() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
-                            } else {
-                                MyWebSocket.client.send("{'type':'normal','peopleId':'" + capture.getPeopleId() + "','temp':'" + temp + "','base64':'" + imageBase64 + "'," + "'deviceId':'" + device.getCplatDeviceId()
-                                        + "','captureTime':'" + capture.getCompareDate() + "','tenantId':'" + this.propertiesUtil.getTenantId() + "'}");
-                            }
-                        } else {
-                            logger.info("刷脸认证信息录入失败，设备编号：" + capture.getDeviceId());
-                        }
+                        capture.setCompareDate(System.currentTimeMillis());
+                        capture.setCreateTime(System.currentTimeMillis());
+                        this.captureMapper.insert(capture);
                     }
                 }
             } else if (uri.contains(HttpConstant.LL_OPEN_DOOR)) {
-                //查询住户回调信息
+                //开门回调信息
                 String decrypt = getMessage(message);
                 logger.info("检测到服务器请求：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
                     Capture capture = new Capture();
-                    capture.setDeviceId(this.issue.getDeviceId());
+                    capture.setProductCode(issue.getProductCode());
                     capture.setOpendoorMode(2);
                     capture.setResultCode(1);
-                    capture.setCompareDate(String.valueOf(System.currentTimeMillis()));
-                    capture.setCreateTime(String.valueOf(System.currentTimeMillis()));
-                    int result = this.deviceMapper.insertCapture(capture);
-                    if (result > 0){
-                        logger.info("远程开门信息录入成功，设备编号：" + capture.getDeviceId());
-                    } else {
-                        logger.info("远程开门信息录入失败，设备编号：" + capture.getDeviceId());
-                    }
+                    capture.setCompareDate(issue.getIssueTime());
+                    capture.setCreateTime(System.currentTimeMillis());
+                    this.captureMapper.insert(capture);
                     logger.info("远程开门成功");
+                } else {
+                    Capture capture = new Capture();
+                    capture.setProductCode(issue.getProductCode());
+                    capture.setOpendoorMode(2);
+                    capture.setResultCode(0);
+                    capture.setCompareDate(issue.getIssueTime());
+                    capture.setCreateTime(System.currentTimeMillis());
+                    this.captureMapper.insert(capture);
+                    logger.info("远程开门失败");
                 }
             }
         } catch (Exception e) {
@@ -228,13 +247,14 @@ public class MyWebSocketClientLL extends WebSocketClient {
     @Override
     public void onClose(int arg0, String arg1, boolean arg2) {
         logger.info("客户端已关闭!");
-        if (uri.contains(HttpConstant.LL_EVENT)) {
+        if (uri.contains(HttpConstant.LL_EVENT) || code == null) {
+            code = null;
             logger.info("开始尝试重新连接冠林服务器...");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(1 * 1000);
+                        Thread.sleep(60 * 1000);
                         reConnect();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -247,8 +267,6 @@ public class MyWebSocketClientLL extends WebSocketClient {
 
     private void reConnect() throws Exception {
         this.myWebSocketLL.login();
-        Thread.sleep(2000);
-        this.myWebSocketLL.event();
     }
 
     /**

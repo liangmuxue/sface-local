@@ -15,44 +15,19 @@ import org.springframework.stereotype.Component;
 @PropertySource(value = "classpath:application.properties")
 public class PropertiesUtil {
 
-    private String ip;
-    private String port;
     private String tenantId;
-    private String cplatHttp;
+    private String tenantName;
+    private String serverHttp;
     private String userName;
     private String password;
     private String captureUrl;
-    private String serverIp;
-    private String socketPort;
     private String webSocketUrl;
     private String webSocketUrlLL;
     private String userNameLL;
     private String passwordLL;
-    private String tempPictureUrl;
 
-    private String ftpIp;
-    private int ftpPort;
-    private String ftpUserName;
-    private String ftppassWord;
-    private String picUrl;
 
     public PropertiesUtil() {
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
     }
 
     public String getTenantId() {
@@ -63,12 +38,20 @@ public class PropertiesUtil {
         this.tenantId = tenantId;
     }
 
-    public String getCplatHttp() {
-        return cplatHttp;
+    public String getTenantName() {
+        return tenantName;
     }
 
-    public void setCplatHttp(String cplatHttp) {
-        this.cplatHttp = cplatHttp;
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
+    }
+
+    public String getServerHttp() {
+        return serverHttp;
+    }
+
+    public void setServerHttp(String serverHttp) {
+        this.serverHttp = serverHttp;
     }
 
     public String getUserName() {
@@ -93,22 +76,6 @@ public class PropertiesUtil {
 
     public void setCaptureUrl(String captureUrl) {
         this.captureUrl = captureUrl;
-    }
-
-    public String getServerIp() {
-        return serverIp;
-    }
-
-    public void setServerIp(String serverIp) {
-        this.serverIp = serverIp;
-    }
-
-    public String getSocketPort() {
-        return socketPort;
-    }
-
-    public void setSocketPort(String socketPort) {
-        this.socketPort = socketPort;
     }
 
     public String getWebSocketUrl() {
@@ -141,53 +108,5 @@ public class PropertiesUtil {
 
     public void setPasswordLL(String passwordLL) {
         this.passwordLL = passwordLL;
-    }
-
-    public String getTempPictureUrl() {
-        return tempPictureUrl;
-    }
-
-    public void setTempPictureUrl(String tempPictureUrl) {
-        this.tempPictureUrl = tempPictureUrl;
-    }
-
-    public String getFtpIp() {
-        return ftpIp;
-    }
-
-    public void setFtpIp(String ftpIp) {
-        this.ftpIp = ftpIp;
-    }
-
-    public int getFtpPort() {
-        return ftpPort;
-    }
-
-    public void setFtpPort(int ftpPort) {
-        this.ftpPort = ftpPort;
-    }
-
-    public String getFtpUserName() {
-        return ftpUserName;
-    }
-
-    public void setFtpUserName(String ftpUserName) {
-        this.ftpUserName = ftpUserName;
-    }
-
-    public String getFtppassWord() {
-        return ftppassWord;
-    }
-
-    public void setFtppassWord(String ftppassWord) {
-        this.ftppassWord = ftppassWord;
-    }
-
-    public String getPicUrl() {
-        return picUrl;
-    }
-
-    public void setPicUrl(String picUrl) {
-        this.picUrl = picUrl;
     }
 }

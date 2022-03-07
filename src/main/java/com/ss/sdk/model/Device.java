@@ -1,26 +1,39 @@
 package com.ss.sdk.model;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 /**
  * 设备类
  * @author 李爽超 chao
  * @create 2019/12/11
  * @email lishuangchao@ss-cas.com
  **/
+@Table(name = "sface_device")
 public class Device {
 
+    @Id
     private Integer id;
+    @Column(name = "device_id")
     private String deviceId;
-    private String cplatDeviceId;
+    @Column(name = "product_code")
+    private String productCode;
     private String ip;
     private Integer port;
+    @Column(name = "user_name")
     private String userName;
     private String password;
     private Integer state;
+    @Column(name = "is_delete")
     private Integer isDelete;
-    private String productCode;
-    private Integer cameraState;
+    @Column(name = "device_type")
     private Integer deviceType;
+    @Column(name = "device_type_detail")
     private Integer deviceTypeDetail;
+    @Transient
+    private Integer cameraState;
 
     public Integer getId() {
         return id;
@@ -38,12 +51,12 @@ public class Device {
         this.deviceId = deviceId;
     }
 
-    public String getCplatDeviceId() {
-        return cplatDeviceId;
+    public String getProductCode() {
+        return productCode;
     }
 
-    public void setCplatDeviceId(String cplatDeviceId) {
-        this.cplatDeviceId = cplatDeviceId;
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
     }
 
     public String getIp() {
@@ -94,22 +107,6 @@ public class Device {
         this.isDelete = isDelete;
     }
 
-    public String getProductCode() {
-        return productCode;
-    }
-
-    public void setProductCode(String productCode) {
-        this.productCode = productCode;
-    }
-
-    public Integer getCameraState() {
-        return cameraState;
-    }
-
-    public void setCameraState(Integer cameraState) {
-        this.cameraState = cameraState;
-    }
-
     public Integer getDeviceType() {
         return deviceType;
     }
@@ -124,5 +121,13 @@ public class Device {
 
     public void setDeviceTypeDetail(Integer deviceTypeDetail) {
         this.deviceTypeDetail = deviceTypeDetail;
+    }
+
+    public Integer getCameraState() {
+        return cameraState;
+    }
+
+    public void setCameraState(Integer cameraState) {
+        this.cameraState = cameraState;
     }
 }

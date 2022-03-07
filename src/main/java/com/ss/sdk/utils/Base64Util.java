@@ -96,6 +96,9 @@ public class Base64Util {
         // 保存
         try {
             File dir = new File(path);
+            if (!dir.getParentFile().exists()) {
+                dir.getParentFile().mkdirs();
+            }
             dir.createNewFile();
             bs = d.decodeBuffer(Base64.encode(b));
             os = new FileOutputStream(path);
