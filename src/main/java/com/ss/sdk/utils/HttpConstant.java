@@ -7,7 +7,11 @@ public class HttpConstant {
 
     public static String FACE_LIST = "/peopleDeviceRef/getIssueData";
 
+    public static String VISITOR_LIST = "/visitor/syncToSdk";
+
     public static String FACE_LIST_RESULT = "/peopleDeviceRef/issue/status";
+
+    public static String VISITOR_RESULT = "/visitor/issueStatus";
 
     public static String UPLOAD_CAPTURE_LIST = "/collect/capture/syncRecord";
 
@@ -27,5 +31,9 @@ public class HttpConstant {
     public static String LL_FACE_REMOVE = "/face/remove";
 
     public static String LL_OPEN_DOOR = "/ctrl/door_open";
+
+    public static String VISTOR_MANA = "/visitor/add";
+
+    public static String VISTOR_SIGNOUT = "/visitor/signout";
 
 }

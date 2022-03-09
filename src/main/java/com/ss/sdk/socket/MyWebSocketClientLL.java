@@ -1,14 +1,8 @@
 package com.ss.sdk.socket;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ss.sdk.mapper.CaptureMapper;
-import com.ss.sdk.mapper.DeviceMapper;
-import com.ss.sdk.mapper.IssueMapper;
-import com.ss.sdk.mapper.WhiteListMapper;
-import com.ss.sdk.model.Capture;
-import com.ss.sdk.model.Device;
-import com.ss.sdk.model.Issue;
-import com.ss.sdk.model.WhiteList;
+import com.ss.sdk.mapper.*;
+import com.ss.sdk.model.*;
 import com.ss.sdk.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,11 +27,14 @@ public class MyWebSocketClientLL extends WebSocketClient {
     private MyWebSocketLL myWebSocketLL = ApplicationContextProvider.getBean(MyWebSocketLL.class);
     private WhiteListMapper whiteListMapper = ApplicationContextProvider.getBean(WhiteListMapper.class);
     private IssueMapper issueMapper = ApplicationContextProvider.getBean(IssueMapper.class);
+    private IssueVisitorMapper issueVisitorMapper = ApplicationContextProvider.getBean(IssueVisitorMapper.class);
     private CaptureMapper captureMapper = ApplicationContextProvider.getBean(CaptureMapper.class);
     private DeviceMapper deviceMapper = ApplicationContextProvider.getBean(DeviceMapper.class);
+    private WhiteVisitorListMapper whiteVisitorListMapper = ApplicationContextProvider.getBean(WhiteVisitorListMapper.class);
 
     private String uri;
     private Issue issue;
+    private IssueVisitor issueVisitor;
 
     public static String code;
     public static String timestamp;
@@ -52,6 +49,12 @@ public class MyWebSocketClientLL extends WebSocketClient {
         super(new URI(serverUri));
         this.uri = serverUri;
         this.issue = issue;
+    }
+
+    public MyWebSocketClientLL(String serverUri, IssueVisitor issueVisitor) throws Exception {
+        super(new URI(serverUri));
+        this.uri = serverUri;
+        this.issueVisitor = issueVisitor;
     }
 
     @Override
@@ -117,6 +120,50 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     this.issue.setFailReason(failReason);
                     this.issueMapper.insert(issue);
                     logger.info("新增人脸照片失败：" + failReason);
+                }
+            } else if (uri.contains(HttpConstant.VISTOR_MANA)) {
+                //新增访客回调信息
+                String decrypt = getMessage(message);
+                logger.info("检测冠林新增访客回调信息：" + decrypt);
+                JSONObject jsonObject = JSONObject.parseObject(decrypt);
+                if ("0".equals(jsonObject.getString("Result"))){
+                    JSONObject bodyObject = jsonObject.getJSONObject("Body");
+                    String id = bodyObject.getString("VIPK");
+                    WhiteVisitorList whiteVisitorList = new WhiteVisitorList();
+                    whiteVisitorList.setPeopleId(issueVisitor.getPeopleId());
+                    whiteVisitorList.setProductCode(issueVisitor.getProductCode());
+                    whiteVisitorList.setDevicePeopleId(id);
+                    whiteVisitorList.setVisitorTime(issueVisitor.getVisitorTime());
+                    whiteVisitorList.setLeaveTime(issueVisitor.getLeaveTime());
+                    this.whiteVisitorListMapper.insert(whiteVisitorList);
+                    issueVisitor.setIssueStatus(1);
+                    issueVisitor.setReturnResult(0);
+                    issueVisitor.setIssueTime(System.currentTimeMillis());
+                    this.issueVisitorMapper.insert(issueVisitor);
+                    logger.info("新增访客成功");
+                } else {
+                    String failReason = jsonObject.getString("Message");
+                    this.issueVisitor.setIssueStatus(2);
+                    issueVisitor.setReturnResult(0);
+                    this.issueVisitor.setIssueTime(System.currentTimeMillis());
+                    this.issueVisitor.setFailReason(failReason);
+                    this.issueVisitorMapper.insert(issueVisitor);
+                    logger.info("新增访客失败：" + failReason);
+                }
+            } else if (uri.contains(HttpConstant.VISTOR_SIGNOUT)) {
+                //新增访客回调信息
+                String decrypt = getMessage(message);
+                logger.info("检测冠林删除访客回调信息：" + decrypt);
+                JSONObject jsonObject = JSONObject.parseObject(decrypt);
+                if ("0".equals(jsonObject.getString("Result"))){
+                    WhiteVisitorList whiteVisitorList = new WhiteVisitorList();
+                    whiteVisitorList.setProductCode(issueVisitor.getProductCode());
+                    whiteVisitorList.setPeopleId(issueVisitor.getPeopleId());
+                    this.whiteVisitorListMapper.delete(whiteVisitorList);
+                    logger.info("删除访客成功");
+                } else {
+                    String failReason = jsonObject.getString("Message");
+                    logger.info("删除访客失败：" + failReason);
                 }
             } else if (uri.contains(HttpConstant.LL_TENEMENT_DELETE)) {
                 //删除住户回调信息

@@ -1,10 +1,9 @@
 package com.ss.sdk.socket;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ss.sdk.model.Issue;
-import com.ss.sdk.utils.AESUtil;
-import com.ss.sdk.utils.Base64Util;
-import com.ss.sdk.utils.HttpConstant;
-import com.ss.sdk.utils.PropertiesUtil;
+import com.ss.sdk.model.IssueVisitor;
+import com.ss.sdk.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.WebSocket;
@@ -14,7 +13,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 /**
  * WebSocketLL
@@ -79,6 +83,49 @@ public class MyWebSocketLL implements ApplicationRunner {
             clientLL.connectBlocking();
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 String text = "{'FrameNo':'" + issue.getDeviceId() + "','Name':'" + issue.getPeopleName() + "','Gender':0,'CredentialType':'111','CredentialID':'" + issue.getPeopleId() + "'}";
+                String otherKey = AESUtil.getOtherKey(userName);
+                String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
+                clientLL.send(encrypt);
+            }
+        } catch (Exception e) {
+            logger.info("冠林设备添加住户异常：" + e.toString(), e);
+        }
+    }
+
+    /**
+     * 新增访客
+     * @param issueVisitor
+     */
+    public void visitorAdd(IssueVisitor issueVisitor) {
+        try {
+            String userName = this.propertiesUtil.getUserNameLL();
+            MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.VISTOR_MANA + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issueVisitor);
+            clientLL.connectBlocking();
+            if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+                String imageBase64 = Base64Util.imagebase64(issueVisitor.getPeopleFacePath());
+//                String text = "{'FrameNo':'" + issue.getDeviceId() + "','Name':'" + issue.getPeopleName() + "','Gender':0,'CredentialType':'111','CredentialID':'" + issue.getPeopleId() + "'}";
+//                String text = "{'VIName':'" + issueVisitor.getPeopleName() + "','VISex':0,'VICredentialType':'111', 'VICredentialID':'" + issueVisitor.getPeopleId() + "', 'VIDestFrameNo':'"+ issueVisitor.getDeviceId() +"', 'VIVisitorTime':"+ issueVisitor.getVisitorTime() +", 'VIImageInBase64':'data:image/jpeg;base64,"+ imageBase64 +"', 'VILeaveTime':"+ issueVisitor.getLeaveTime() +"}";
+                String text = "{'VIName':'" + issueVisitor.getPeopleName() + "','VISex':0,'VICredentialType':'111', 'VICredentialID':'" + issueVisitor.getPeopleId() + "', 'VIPersonNumber': 1, 'VIDestFrameNo':'"+ issueVisitor.getDeviceId() +"', 'VIVisitorTime':'"+ DateUtils.stampToTime(issueVisitor.getVisitorTime(), "yyyy-MM-dd HH:ss:mm") +"', 'VIImageInBase64':'data:image/jpeg;base64,"+ imageBase64 +"', 'VILeaveTime':'"+ DateUtils.stampToTime(issueVisitor.getLeaveTime(), "yyyy-MM-dd HH:ss:mm") +"'}";
+                String otherKey = AESUtil.getOtherKey(userName);
+                String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
+                clientLL.send(encrypt);
+            }
+        } catch (Exception e) {
+            logger.info("冠林设备添加住户异常：" + e.toString(), e);
+        }
+    }
+
+    /**
+     * 访客迁出
+     * @param issueVisitor
+     */
+    public void visitorSignOut(IssueVisitor issueVisitor) {
+        try {
+            String userName = this.propertiesUtil.getUserNameLL();
+            MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.VISTOR_SIGNOUT + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issueVisitor);
+            clientLL.connectBlocking();
+            if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+                String text = "{'VIPK':" + BigDecimal.valueOf(Long.parseLong(issueVisitor.getDevicePeopleId())) + "}";
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);
