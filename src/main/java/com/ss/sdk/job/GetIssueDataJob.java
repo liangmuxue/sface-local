@@ -86,6 +86,7 @@ public class GetIssueDataJob {
                         continue;
                     }
                     first:for (Issue i: value) {
+                        Thread.sleep(1000);
                         if (d.getDeviceType() == 3) {
                             //冠林设备
                             List<WhiteList> whiteLists = whiteListMap.get(i.getPeopleId());
@@ -118,7 +119,7 @@ public class GetIssueDataJob {
                 }
             }
 
-            Thread.sleep(5000);
+            Thread.sleep(2000);
             Issue issue = new Issue();
             issue.setReturnResult(0);
             List<Issue> list = this.issueMapper.select(issue);
