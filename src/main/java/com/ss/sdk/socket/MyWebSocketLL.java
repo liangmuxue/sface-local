@@ -125,7 +125,7 @@ public class MyWebSocketLL implements ApplicationRunner {
             MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.VISTOR_SIGNOUT + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issueVisitor);
             clientLL.connectBlocking();
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                String text = "{'VIPK':" + BigDecimal.valueOf(Long.parseLong(issueVisitor.getDevicePeopleId())) + "}";
+                String text = "{'VIPK':" + BigDecimal.valueOf(Double.parseDouble(issueVisitor.getDevicePeopleId())) + "}";
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);
