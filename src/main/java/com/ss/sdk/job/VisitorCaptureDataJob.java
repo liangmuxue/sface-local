@@ -51,13 +51,13 @@ public class VisitorCaptureDataJob {
         //（要改）这里要加个类型
         Example example = new Example(Capture.class);
         //如果是访客people_id后面要加v
-        example.createCriteria().andGreaterThan("compareDate", time).andLike("peopleId", "%v");
+        example.createCriteria().andGreaterThan("compareDate", time).andLike("peopleId", "V%");
         //本次要同步数据
         List<Capture> captureList = this.captureMapper.selectByExample(example);
         if (captureList.size() > 0){
             //本次最新数据时间
             long maxTime = 0;
-            captureList.forEach(e -> e.setPeopleId(StringUtils.substringBefore(e.getPeopleId(), "v")));
+            captureList.forEach(e -> e.setPeopleId(StringUtils.substringAfter(e.getPeopleId(), "V")));
             List<Capture> captures = new ArrayList<>();
             for (Capture capture: captureList) {
                 if (capture.getCreateTime() > maxTime) {
