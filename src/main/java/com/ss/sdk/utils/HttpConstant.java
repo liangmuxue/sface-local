@@ -15,6 +15,8 @@ public class HttpConstant {
 
     public static String UPLOAD_CAPTURE_LIST = "/collect/capture/syncRecord";
 
+    public static String UPLOAD_VISITOR_CAPTURE_LIST = "/visitor/record/syncRecord";
+
     public static String DEVICE_STATE = "/camera/updateCameraState";
 
     /*冠林*/

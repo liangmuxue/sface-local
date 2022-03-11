@@ -9,6 +9,7 @@ import com.ss.sdk.socket.MyWebSocketLL;
 import com.ss.sdk.utils.BaseHttpUtil;
 import com.ss.sdk.utils.HttpConstant;
 import com.ss.sdk.utils.PropertiesUtil;
+import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -97,7 +98,14 @@ public class GetIssueVisitorJob {
                                     this.myWebSocketLL.visitorSignOut(i);
                                 }
                             } else {
+                                //如果之前有这个人，要先把他签出，然后在去新增
+                                whiteVisitorList = CollectionUtils.isEmpty(whiteVisitorList) ? Lists.newArrayList() : whiteVisitorList;
+                                WhiteVisitorList testVisi = whiteVisitorList.stream().filter(k -> k.getProductCode().equals(i.getProductCode())).findFirst().orElse(null);
                                 i.setDeviceId(d.getDeviceId().substring(0, 4) + "0001");
+                                if (testVisi != null){
+                                    i.setDevicePeopleId(testVisi.getDevicePeopleId());
+                                    this.myWebSocketLL.visitorSignOut(i);
+                                }
                                 //新增访客
                                 this.myWebSocketLL.visitorAdd(i);
                             }

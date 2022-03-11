@@ -203,6 +203,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                 if ("1".equals(jsonObject.getString("EventCode")) && "OpenTheDoor".equals(jsonObject.getString("EventType"))){
                     logger.info("检测到门禁通行事件请求");
                     JSONObject eventObject = jsonObject.getJSONObject("EventData");
+                    System.out.println(" ======= " + eventObject);
                     String deviceId = eventObject.getString("DeviceId");
                     String openMode = eventObject.getString("OpenMode");
                     String similarity = eventObject.getString("Similarity");
