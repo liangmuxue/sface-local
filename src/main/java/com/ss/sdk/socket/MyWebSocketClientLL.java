@@ -226,7 +226,11 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     if("4".equals(openMode)){
                         capture.setPeopleId(credentialId);
                         capture.setProductCode(device.getProductCode());
-                        capture.setOpendoorMode(1);
+                        if (credentialId != null && credentialId.startsWith("V")) {
+                            capture.setOpendoorMode(6);
+                        } else {
+                            capture.setOpendoorMode(1);
+                        }
                         capture.setResultCode(1);
                         capture.setRecogScore(Float.valueOf(similarity));
                         if (temp != null){

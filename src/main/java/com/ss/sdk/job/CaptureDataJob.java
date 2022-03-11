@@ -46,7 +46,7 @@ public class CaptureDataJob {
         //上次同步最新时间
         Long time = captureTime.getTime();
         Example example = new Example(Capture.class);
-        example.createCriteria().andGreaterThan("compareDate", time);
+        example.createCriteria().andGreaterThan("compareDate", time).andNotLike("peopleId", "V%");
         //本次要同步数据
         List<Capture> captureList = this.captureMapper.selectByExample(example);
         if (captureList.size() > 0){
