@@ -86,7 +86,7 @@ public class GetIssueDataJob {
                         continue;
                     }
                     first:for (Issue i: value) {
-                        Thread.sleep(1000);
+                        Thread.sleep(2000);
                         if (d.getDeviceType() == 3) {
                             //冠林设备
                             List<WhiteList> whiteLists = whiteListMap.get(i.getPeopleId());
@@ -101,7 +101,7 @@ public class GetIssueDataJob {
                                     }
                                 }
                             } else {
-                                i.setDeviceId(d.getDeviceId().substring(0, 4) + "0001");
+                                i.setDeviceId(d.getDeviceId());
                                 if (whiteLists != null) {
                                     for (WhiteList wl: whiteLists) {
                                         if (wl.getProductCode().equals(i.getProductCode())) {

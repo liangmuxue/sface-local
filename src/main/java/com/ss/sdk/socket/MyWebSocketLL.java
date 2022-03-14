@@ -1,8 +1,7 @@
 package com.ss.sdk.socket;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ss.sdk.model.Issue;
-import com.ss.sdk.model.IssueVisitor;
+import com.ss.sdk.model.*;
 import com.ss.sdk.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,7 +81,25 @@ public class MyWebSocketLL implements ApplicationRunner {
             MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.LL_TENEMENT_ADD + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issue);
             clientLL.connectBlocking();
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                String text = "{'FrameNo':'" + issue.getDeviceId() + "','Name':'" + issue.getPeopleName() + "','Gender':0,'CredentialType':'111','CredentialID':'" + issue.getPeopleId() + "'}";
+                String no = issue.getDeviceId().substring(0, 4) + "0001";
+                String text = "{'FrameNo':'" + no + "','Name':'" + issue.getPeopleName() + "','Gender':0,'Telephone':'001','Telephone2':'002','CredentialType':'111','CredentialID':'" + issue.getPeopleId() + "'}";
+                String otherKey = AESUtil.getOtherKey(userName);
+                String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
+                clientLL.send(encrypt);
+            }
+        } catch (Exception e) {
+            logger.info("冠林设备添加住户异常：" + e.toString(), e);
+        }
+    }
+
+    public void tenementPermission(Issue issue) {
+        try {
+            String userName = this.propertiesUtil.getUserNameLL();
+            MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.LL_TENEMENT_PERMISSION + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issue);
+            clientLL.connectBlocking();
+            if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+
+                String text = "{'ID':['" + issue.getDevicePeopleId() + "'],'DeviceNo':['" + issue.getDeviceId() + "'],'IsEnable':'1','PersonType':1}";
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);

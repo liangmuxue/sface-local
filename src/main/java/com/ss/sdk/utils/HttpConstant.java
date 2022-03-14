@@ -26,6 +26,8 @@ public class HttpConstant {
 
     public static String LL_TENEMENT_ADD = "/tenement/add";
 
+    public static String LL_TENEMENT_PERMISSION = "/tenement/permission";
+
     public static String LL_TENEMENT_DELETE = "/tenement/delete";
 
     public static String LL_FACE_ADD = "/face/add";

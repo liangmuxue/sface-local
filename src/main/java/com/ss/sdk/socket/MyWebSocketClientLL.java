@@ -92,6 +92,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     myWebSocketLL.faceAdd(issue);
                 } else {
                     String failReason = jsonObject.getString("Message");
+                    insertFailIssue(failReason);
                     logger.info("新增住户失败：" + failReason);
                 }
             } else if (uri.contains(HttpConstant.LL_FACE_ADD)) {
@@ -100,26 +101,33 @@ public class MyWebSocketClientLL extends WebSocketClient {
                 logger.info("检测冠林新增人脸回调信息：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
-                    JSONObject bodyObject = jsonObject.getJSONObject("Body");
-                    String id = bodyObject.getString("TeneID");
+                    myWebSocketLL.tenementPermission(issue);
+                    logger.info("新增人脸照片成功");
+                } else {
+                    String failReason = jsonObject.getString("Message");
+                    insertFailIssue(failReason);
+                    logger.info("新增人脸照片失败：" + failReason);
+                }
+            } else if (uri.contains(HttpConstant.LL_TENEMENT_PERMISSION)) {
+                //修改住户权限回调信息
+                String decrypt = getMessage(message);
+                logger.info("检测冠林新增人脸回调信息：" + decrypt);
+                JSONObject jsonObject = JSONObject.parseObject(decrypt);
+                if ("0".equals(jsonObject.getString("Result"))){
                     WhiteList whiteList = new WhiteList();
                     whiteList.setPeopleId(issue.getPeopleId());
                     whiteList.setProductCode(issue.getProductCode());
-                    whiteList.setDevicePeopleId(id);
+                    whiteList.setDevicePeopleId(issue.getDevicePeopleId());
                     this.whiteListMapper.insert(whiteList);
                     issue.setIssueStatus(1);
                     issue.setReturnResult(0);
                     issue.setIssueTime(System.currentTimeMillis());
                     this.issueMapper.insert(issue);
-                    logger.info("新增人脸照片成功");
+                    logger.info("修改住户权限成功");
                 } else {
                     String failReason = jsonObject.getString("Message");
-                    this.issue.setIssueStatus(2);
-                    issue.setReturnResult(0);
-                    this.issue.setIssueTime(System.currentTimeMillis());
-                    this.issue.setFailReason(failReason);
-                    this.issueMapper.insert(issue);
-                    logger.info("新增人脸照片失败：" + failReason);
+                    insertFailIssue(failReason);
+                    logger.info("修改住户权限失败：" + failReason);
                 }
             } else if (uri.contains(HttpConstant.VISTOR_MANA)) {
                 //新增访客回调信息
@@ -289,6 +297,13 @@ public class MyWebSocketClientLL extends WebSocketClient {
         }
     }
 
+    private void insertFailIssue(String failReason) {
+        this.issue.setIssueStatus(2);
+        issue.setReturnResult(0);
+        this.issue.setIssueTime(System.currentTimeMillis());
+        this.issue.setFailReason(failReason);
+        this.issueMapper.insert(issue);
+    }
     @Override
     public void onError(Exception arg0) {
         arg0.printStackTrace();
