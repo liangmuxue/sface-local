@@ -47,6 +47,8 @@ public class CaptureDataJob {
         Long time = captureTime.getTime();
         Example example = new Example(Capture.class);
         example.createCriteria().andGreaterThan("compareDate", time).andNotLike("peopleId", "V%");
+        Example.Criteria criteria = example.createCriteria().andGreaterThan("compareDate", time).andEqualTo("opendoorMode", 2);
+        example.or(criteria);
         //本次要同步数据
         List<Capture> captureList = this.captureMapper.selectByExample(example);
         if (captureList.size() > 0){
