@@ -83,6 +83,7 @@ public class MyWebSocketLL implements ApplicationRunner {
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 String no = issue.getDeviceId().substring(0, 4) + "0001";
                 String text = "{'FrameNo':'" + no + "','Name':'" + issue.getPeopleName() + "','Gender':0,'Telephone':'001','Telephone2':'002','CredentialType':'111','CredentialID':'" + issue.getPeopleId() + "'}";
+                logger.info("新增住户请求：" + text);
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);
@@ -98,8 +99,8 @@ public class MyWebSocketLL implements ApplicationRunner {
             MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.LL_TENEMENT_PERMISSION + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issue);
             clientLL.connectBlocking();
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-
                 String text = "{'ID':['" + issue.getDevicePeopleId() + "'],'DeviceNo':['" + issue.getDeviceId() + "'],'IsEnable':'1','PersonType':1}";
+                logger.info("分配权限请求：" + text);
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);
@@ -184,6 +185,7 @@ public class MyWebSocketLL implements ApplicationRunner {
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 String imageBase64 = Base64Util.imagebase64(issue.getPeopleFacePath());
                 String text = "{'ID':'" + issue.getDevicePeopleId() + "','Photo':'data:image/jpeg;base64," + imageBase64 + "'}";
+                logger.info("新增人脸图片请求：" + text);
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);

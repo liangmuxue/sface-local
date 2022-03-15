@@ -114,7 +114,7 @@ public class GetIssueVisitorJob {
                 });
             }
 
-            Thread.sleep(5000);
+            Thread.sleep(2000);
             IssueVisitor issueVisitor = new IssueVisitor();
             issueVisitor.setReturnResult(0);
             List<IssueVisitor> list = this.issueVisitorMapper.select(issueVisitor);

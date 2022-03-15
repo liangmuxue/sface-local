@@ -40,6 +40,8 @@ public class MyWebSocketClientLL extends WebSocketClient {
     public static String timestamp;
     public static String sign;
 
+    private Integer type = null;
+
     public MyWebSocketClientLL(String serverUri) throws Exception {
         super(new URI(serverUri));
         this.uri = serverUri;
@@ -76,7 +78,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     code = jsonBody.getString("Code");
                     timestamp = jsonBody.getString("Timestamp");
                     sign = jsonBody.getString("Sign");
-                    myWebSocketLL.event();
+                    type = 1;
                 }
             } else if (uri.contains(HttpConstant.LL_TENEMENT_ADD)) {
                 //新增住户回调信息
@@ -89,7 +91,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     JSONObject bodyObject = jsonObject.getJSONObject("Body");
                     String id = bodyObject.getString("ID");
                     issue.setDevicePeopleId(id);
-                    myWebSocketLL.faceAdd(issue);
+                    type = 2;
                 } else {
                     String failReason = jsonObject.getString("Message");
                     insertFailIssue(failReason);
@@ -101,7 +103,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                 logger.info("检测冠林新增人脸回调信息：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
-                    myWebSocketLL.tenementPermission(issue);
+                    type = 3;
                     logger.info("新增人脸照片成功");
                 } else {
                     String failReason = jsonObject.getString("Message");
@@ -111,7 +113,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
             } else if (uri.contains(HttpConstant.LL_TENEMENT_PERMISSION)) {
                 //修改住户权限回调信息
                 String decrypt = getMessage(message);
-                logger.info("检测冠林新增人脸回调信息：" + decrypt);
+                logger.info("修改住户权限回调信息：" + decrypt);
                 JSONObject jsonObject = JSONObject.parseObject(decrypt);
                 if ("0".equals(jsonObject.getString("Result"))){
                     WhiteList whiteList = new WhiteList();
@@ -199,7 +201,7 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     whiteList.setPeopleId(issue.getPeopleId());
                     this.whiteListMapper.delete(whiteList);
                     logger.info("删除人脸成功");
-                    myWebSocketLL.faceAdd(this.issue);
+                    type = 2;
                 } else {
                     String failReason = jsonObject.getString("Message");
                     logger.info("删除人脸失败：" + failReason);
@@ -290,6 +292,20 @@ public class MyWebSocketClientLL extends WebSocketClient {
             if (!uri.contains(HttpConstant.LL_EVENT)){
                 try {
                     this.close();
+                    if (type != null) {
+                        if (type == 1) {
+                            type = null;
+                            myWebSocketLL.event();
+                        } else if (type == 2) {
+                            type = null;
+                            Thread.sleep(1000);
+                            myWebSocketLL.faceAdd(issue);
+                        } else if (type == 3) {
+                            type = null;
+                            Thread.sleep(1000);
+                            myWebSocketLL.tenementPermission(issue);
+                        }
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
