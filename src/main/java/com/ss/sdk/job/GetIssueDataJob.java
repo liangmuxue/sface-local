@@ -85,13 +85,12 @@ public class GetIssueDataJob {
                     if (d == null) {
                         continue;
                     }
-                    first:for (Issue i: value) {
+                    for (Issue i: value) {
                         Thread.sleep(2000);
                         if (d.getDeviceType() == 3) {
                             //冠林设备
                             List<WhiteList> whiteLists = whiteListMap.get(i.getPeopleId());
                             if (i.getTaskType() == -1){
-                                i.setDeviceId(d.getDeviceId().substring(0, 4) + "0001");
                                 for (WhiteList wl: whiteLists) {
                                     if (wl.getProductCode().equals(i.getProductCode())) {
                                         //删除住户
@@ -106,8 +105,8 @@ public class GetIssueDataJob {
                                     for (WhiteList wl: whiteLists) {
                                         if (wl.getProductCode().equals(i.getProductCode())) {
                                             i.setDevicePeopleId(wl.getDevicePeopleId());
-                                            this.myWebSocketLL.faceRemove(i);
-                                            continue first;
+                                            this.myWebSocketLL.tenementDelete(i);
+                                            break;
                                         }
                                     }
                                 }

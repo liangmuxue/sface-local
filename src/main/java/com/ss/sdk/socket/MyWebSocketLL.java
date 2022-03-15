@@ -83,7 +83,6 @@ public class MyWebSocketLL implements ApplicationRunner {
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 String no = issue.getDeviceId().substring(0, 4) + "0001";
                 String text = "{'FrameNo':'" + no + "','Name':'" + issue.getPeopleName() + "','Gender':0,'Telephone':'001','Telephone2':'002','CredentialType':'111','CredentialID':'" + issue.getPeopleId() + "'}";
-                logger.info("新增住户请求：" + text);
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);
@@ -100,7 +99,6 @@ public class MyWebSocketLL implements ApplicationRunner {
             clientLL.connectBlocking();
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 String text = "{'ID':['" + issue.getDevicePeopleId() + "'],'DeviceNo':['" + issue.getDeviceId() + "'],'IsEnable':'1','PersonType':1}";
-                logger.info("分配权限请求：" + text);
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);
