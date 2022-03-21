@@ -118,7 +118,7 @@ public class GetIssueDataJob {
                 }
             }
 
-            Thread.sleep(2000);
+            Thread.sleep(5000);
             Issue issue = new Issue();
             issue.setReturnResult(0);
             List<Issue> list = this.issueMapper.select(issue);

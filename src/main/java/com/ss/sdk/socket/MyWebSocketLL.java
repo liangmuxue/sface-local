@@ -183,7 +183,6 @@ public class MyWebSocketLL implements ApplicationRunner {
             if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 String imageBase64 = Base64Util.imagebase64(issue.getPeopleFacePath());
                 String text = "{'ID':'" + issue.getDevicePeopleId() + "','Photo':'data:image/jpeg;base64," + imageBase64 + "'}";
-                logger.info("新增人脸图片请求：" + text);
                 String otherKey = AESUtil.getOtherKey(userName);
                 String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
                 clientLL.send(encrypt);
@@ -232,6 +231,26 @@ public class MyWebSocketLL implements ApplicationRunner {
             }
         } catch (Exception e) {
             logger.info("冠林设备远程开门异常：" + e.toString(), e);
+        }
+    }
+
+    /**
+     * 获取住户详情
+     * @param issue
+     */
+    public void tenementInfo(Issue issue) {
+        try {
+            String userName = this.propertiesUtil.getUserNameLL();
+            MyWebSocketClientLL clientLL = new MyWebSocketClientLL(this.propertiesUtil.getWebSocketUrlLL() + HttpConstant.LL_TENEMENT_INFO + "?user=" + userName + "&code=" + MyWebSocketClientLL.code, issue);
+            clientLL.connectBlocking();
+            if (clientLL.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+                String text = "{'TeneID':'" + issue.getDevicePeopleId() + "'}";
+                String otherKey = AESUtil.getOtherKey(userName);
+                String encrypt = AESUtil.encrypt(text, otherKey, otherKey.substring(0, 16));
+                clientLL.send(encrypt);
+            }
+        } catch (Exception e) {
+            logger.info("获取住户详情异常：" + e.toString(), e);
         }
     }
 

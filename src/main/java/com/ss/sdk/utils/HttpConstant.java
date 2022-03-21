@@ -40,4 +40,6 @@ public class HttpConstant {
 
     public static String VISTOR_SIGNOUT = "/visitor/signout";
 
+    public static String LL_TENEMENT_INFO = "/tenement/info";
+
 }

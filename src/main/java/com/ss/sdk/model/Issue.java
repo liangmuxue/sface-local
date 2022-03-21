@@ -42,6 +42,8 @@ public class Issue {
     private String devicePeopleId;
     @Transient
     private String code;
+    @Transient
+    private Integer number = 0;
 
     public Integer getId() {
         return id;
@@ -154,5 +156,13 @@ public class Issue {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public Integer getNumber() {
+        return number;
+    }
+
+    public void setNumber(Integer number) {
+        this.number = number;
     }
 }

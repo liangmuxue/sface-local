@@ -1,9 +1,11 @@
 package com.ss.sdk.socket;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ss.sdk.mapper.*;
 import com.ss.sdk.model.*;
 import com.ss.sdk.utils.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
@@ -109,6 +111,34 @@ public class MyWebSocketClientLL extends WebSocketClient {
                     String failReason = jsonObject.getString("Message");
                     insertFailIssue(failReason);
                     logger.info("新增人脸照片失败：" + failReason);
+                }
+            } else if (uri.contains(HttpConstant.LL_TENEMENT_INFO)) {
+                //获取住户详情回调信息
+                String decrypt = getMessage(message);
+                logger.info("获取住户详情回调信息：" + decrypt);
+                JSONObject jsonObject = JSONObject.parseObject(decrypt);
+                if ("0".equals(jsonObject.getString("Result"))){
+                    JSONArray body = jsonObject.getJSONArray("Body");
+                    JSONObject bodyObject = body.getJSONObject(0);
+                    Integer countFaces = bodyObject.getInteger("CountFace");
+                    if (countFaces != null && countFaces > 0) {
+                        logger.info("获取住户详情成功，人脸不为空");
+                        type = 4;
+                    } else {
+                        Integer number = issue.getNumber();
+                        if (number > 3) {
+                            insertFailIssue("人脸不合格");
+                            logger.info("获取住户详情成功，人脸为空，结束");
+                        } else {
+                            issue.setNumber(number + 1);
+                            logger.info("获取住户详情成功，人脸为空");
+                            type = 2;
+                        }
+                    }
+                } else {
+                    String failReason = jsonObject.getString("Message");
+                    insertFailIssue(failReason);
+                    logger.info("获取住户详情失败：" + failReason);
                 }
             } else if (uri.contains(HttpConstant.LL_TENEMENT_PERMISSION)) {
                 //修改住户权限回调信息
@@ -301,6 +331,10 @@ public class MyWebSocketClientLL extends WebSocketClient {
                             Thread.sleep(1000);
                             myWebSocketLL.faceAdd(issue);
                         } else if (type == 3) {
+                            type = null;
+                            Thread.sleep(1000);
+                            myWebSocketLL.tenementInfo(issue);
+                        } else if (type == 4) {
                             type = null;
                             Thread.sleep(1000);
                             myWebSocketLL.tenementPermission(issue);
