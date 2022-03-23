@@ -86,7 +86,6 @@ public class GetIssueDataJob {
                         continue;
                     }
                     for (Issue i: value) {
-                        Thread.sleep(2000);
                         if (d.getDeviceType() == 3) {
                             //冠林设备
                             List<WhiteList> whiteLists = whiteListMap.get(i.getPeopleId());
@@ -94,8 +93,10 @@ public class GetIssueDataJob {
                                 for (WhiteList wl: whiteLists) {
                                     if (wl.getProductCode().equals(i.getProductCode())) {
                                         //删除住户
+                                        this.logger.info("删除住户开始：" + i.getPeopleName());
                                         i.setDevicePeopleId(wl.getDevicePeopleId());
                                         this.myWebSocketLL.tenementDelete(i);
+                                        Thread.sleep(2000);
                                         break;
                                     }
                                 }
@@ -104,21 +105,24 @@ public class GetIssueDataJob {
                                 if (whiteLists != null) {
                                     for (WhiteList wl: whiteLists) {
                                         if (wl.getProductCode().equals(i.getProductCode())) {
+                                            this.logger.info("删除住户开始：" + i.getPeopleName());
                                             i.setDevicePeopleId(wl.getDevicePeopleId());
                                             this.myWebSocketLL.tenementDelete(i);
+                                            Thread.sleep(5000);
                                             break;
                                         }
                                     }
                                 }
                                 //新增住户
+                                this.logger.info("新增住户开始：" + i.getPeopleName());
                                 this.myWebSocketLL.tenementAdd(i);
+                                Thread.sleep(5000);
                             }
                         }
                     }
                 }
             }
-
-            Thread.sleep(5000);
+            Thread.sleep(2000);
             Issue issue = new Issue();
             issue.setReturnResult(0);
             List<Issue> list = this.issueMapper.select(issue);

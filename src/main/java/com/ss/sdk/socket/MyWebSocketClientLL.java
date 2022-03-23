@@ -332,7 +332,6 @@ public class MyWebSocketClientLL extends WebSocketClient {
                             myWebSocketLL.faceAdd(issue);
                         } else if (type == 3) {
                             type = null;
-                            Thread.sleep(1000);
                             myWebSocketLL.tenementInfo(issue);
                         } else if (type == 4) {
                             type = null;
